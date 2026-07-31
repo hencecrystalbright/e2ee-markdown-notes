@@ -1,43 +1,33 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-// 暫時存放筆記的資料庫範例
-let notes = [
-  {
-    id: "1",
-    title: "歡迎使用端到端加密筆記",
-    content: "# 歡迎！\n這是一份普通的公開筆記，尚未經過 AES 加密。",
-    updatedAt: "2026-07-30",
-    isEncrypted: false,
-  },
-  {
-    id: "2",
-    title: "敏感個人備忘錄 (已加密)",
-    content: "U2FsdGVkX1+vG8P2984kM91Wf2S/H/5qUe/y1Nf34U8G9Rz+Vd4yZ1G+V1mN3R9A",
-    updatedAt: "2026-07-29",
-    isEncrypted: true,
-  },
-];
+export const dynamic = 'force-dynamic';
 
-// GET: 取得所有筆記
 export async function GET() {
-  return NextResponse.json(notes);
+  try {
+    const notes = await prisma.note.findMany({
+      orderBy: { updatedAt: 'desc' },
+    });
+    return NextResponse.json(notes);
+  } catch (error) {
+    console.error("GET API Error:", error);
+    return NextResponse.json([], { status: 500 });
+  }
 }
 
-// POST: 新增筆記
-export async function POST(request: Request) {
+export async function POST(request: Response | Request) {
   try {
     const body = await request.json();
-    const newNote = {
-      id: Date.now().toString(),
-      title: body.title || "無標題筆記",
-      content: body.content || "",
-      updatedAt: new Date().toISOString().split("T")[0],
-      isEncrypted: body.isEncrypted || false,
-    };
-
-    notes.unshift(newNote); // 加到最前面
-    return NextResponse.json(newNote, { status: 201 });
+    const newNote = await prisma.note.create({
+      data: {
+        title: body.title || "無標題筆記",
+        content: body.content || "",
+        isEncrypted: body.isEncrypted || false,
+      },
+    });
+    return NextResponse.json(newNote);
   } catch (error) {
-    return NextResponse.json({ error: "建立筆記失敗" }, { status: 500 });
+    console.error("POST API Error:", error);
+    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
   }
 }

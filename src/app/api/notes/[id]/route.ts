@@ -1,39 +1,44 @@
-export const dynamic = 'force-dynamic'; // 👈 強制停用 API 快取，每次都讀取最新資料庫
-
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-// PUT: 更新單筆筆記
+export const dynamic = 'force-dynamic';
+
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // 改成 Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // 加上 await
+    const { id } = await params;
     const body = await request.json();
-
-    console.log(`更新筆記 ${id}:`, body);
-
-    return NextResponse.json({
-      id,
-      ...body,
-      updatedAt: new Date().toISOString().split("T")[0],
+    
+    const updatedNote = await prisma.note.update({
+      where: { id },
+      data: {
+        title: body.title,
+        content: body.content,
+        isEncrypted: body.isEncrypted,
+        updatedAt: new Date(),
+      },
     });
+    return NextResponse.json(updatedNote);
   } catch (error) {
-    return NextResponse.json({ error: "更新筆記失敗" }, { status: 500 });
+    console.error("PUT API Error:", error);
+    return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
   }
 }
 
-// DELETE: 刪除單筆筆記
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // 改成 Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // 加上 await
-    console.log(`刪除筆記 ${id}`);
-
-    return NextResponse.json({ message: "筆記刪除成功", id });
+    const { id } = await params;
+    await prisma.note.delete({
+      where: { id },
+    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: "刪除筆記失敗" }, { status: 500 });
+    console.error("DELETE API Error:", error);
+    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
   }
 }
