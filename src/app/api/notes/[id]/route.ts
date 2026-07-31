@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'; // 👈 強制停用 API 快取，每次都讀取最新資料庫
+
 import { NextResponse } from 'next/server';
 
 // PUT: 更新單筆筆記
