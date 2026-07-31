@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic';
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params; // 👈 修正 TypeScript 型別驗證
     const body = await request.json();
     
     const updatedNote = await prisma.note.update({
@@ -29,10 +29,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params; // 👈 修正 TypeScript 型別驗證
     await prisma.note.delete({
       where: { id },
     });
