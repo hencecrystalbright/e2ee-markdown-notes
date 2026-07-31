@@ -178,7 +178,9 @@ export default function Home() {
   };
 
   const handleDeleteNote = async (id: string) => {
-    if (!confirm("IF you delete this, you will lost all infomation, ARE YOU SURE？")) return;
+
+    if (!confirm("Are you sure you want to delete this note?3思是否刪除筆記?")) return;
+>>>>>>> a581807 (style: change delete note confirmation message to English)
 
     try {
       const response = await fetch(`/api/notes/${id}`, {
