@@ -10,7 +10,7 @@ datasource db {
 model Note {
   id          String   @id @default(cuid())
   title       String
-  content     String
+  content     String   @db.Text
   isEncrypted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
