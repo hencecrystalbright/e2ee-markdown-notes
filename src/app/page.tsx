@@ -25,8 +25,7 @@ import {
   AlignCenter,
   AlignRight,
   Menu,
-  X,
-  Paperclip
+  X
 } from "lucide-react";
 import { encryptText, decryptText } from "@/lib/crypto";
 
@@ -584,7 +583,7 @@ export default function Home() {
               <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
               <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
 
-              {/* 右下角球型折疊工具箱 */}
+              {/* 右下角球型折疊工具箱 (玩法 B：無綠底，烏龜本體懸浮按鈕) */}
               <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2">
                 {isFabOpen && (
                   <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
@@ -630,15 +629,26 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* 烏龜 FAB 按鈕 */}
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-12 h-12 rounded-full shadow-xl flex items-center justify-center text-white transition-all duration-300 active:scale-90 ${
-                    isFabOpen ? "bg-neutral-700 rotate-45" : "bg-emerald-600 hover:bg-emerald-500"
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
+                    isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
                   }`}
                   title="工具箱"
                 >
-                  {isFabOpen ? <X className="w-6 h-6" /> : <Paperclip className="w-5 h-5" />}
+                  {isFabOpen ? (
+                    <div className="w-12 h-12 rounded-full bg-neutral-800/90 border border-neutral-700 flex items-center justify-center text-neutral-200 shadow-xl backdrop-blur-sm">
+                      <X className="w-6 h-6" />
+                    </div>
+                  ) : (
+                    <img 
+                      src="/turtle1.svg" 
+                      alt="Turtle Toolbox" 
+                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" 
+                    />
+                  )}
                 </button>
               </div>
 
