@@ -178,7 +178,7 @@ export default function Home() {
   };
 
   const handleDeleteNote = async (id: string) => {
-    if (!confirm("確定要刪除這筆筆記嗎？")) return;
+    if (!confirm("IF you delete this, you will lost all infomation, ARE YOU SURE？")) return;
 
     try {
       const response = await fetch(`/api/notes/${id}`, {
