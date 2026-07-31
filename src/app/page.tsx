@@ -111,7 +111,7 @@ export default function Home() {
         const savedNote = await response.json();
         setNotes((prev) => [savedNote, ...prev]);
         setActiveNoteId(savedNote.id);
-        setIsSidebarOpen(false); // 手機端新增後自動收合選單
+        setIsSidebarOpen(false);
       }
     } catch (error) {
       console.error("新增筆記失敗:", error);
@@ -295,7 +295,7 @@ export default function Home() {
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
       
-      {/* 手機版遮罩 Overlay (點擊空白處可收合側邊欄) */}
+      {/* 手機版遮罩 Overlay */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/60 z-20 md:hidden"
@@ -303,7 +303,7 @@ export default function Home() {
         />
       )}
 
-      {/* 側邊欄 Sidebar (支援抽屜式折疊) */}
+      {/* 側邊欄 Sidebar */}
       <aside className={`
         fixed md:static top-0 left-0 h-full w-72 bg-neutral-900 z-30
         border-r border-neutral-800 flex flex-col transition-transform duration-300 ease-in-out
@@ -375,7 +375,7 @@ export default function Home() {
                 key={note.id}
                 onClick={() => {
                   setActiveNoteId(note.id);
-                  setIsSidebarOpen(false); // 選完筆記後自動關閉手機側邊欄
+                  setIsSidebarOpen(false);
                 }}
                 className={`p-3.5 cursor-pointer transition-colors ${
                   activeNoteId === note.id
@@ -410,7 +410,6 @@ export default function Home() {
           <>
             <header className="h-14 border-b border-neutral-800 px-4 flex items-center justify-between bg-neutral-900/30 shrink-0">
               <div className="flex items-center gap-2.5 truncate">
-                {/* 手機版選單按鈕 */}
                 <button
                   onClick={() => setIsSidebarOpen(true)}
                   className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 md:hidden"
@@ -458,17 +457,16 @@ export default function Home() {
               </div>
             </header>
 
-            {activeNote.isEncrypted && (
-              <div className="mx-4 mt-3 p-2.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 shrink-0">
-                <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="text-[11px] leading-tight">
-                  <b>安全提醒：</b>第 1 行為標題（<b>不加密</b>）。請從第 2 行開始輸入機密資料。
-                </span>
-              </div>
-            )}
+            {/* 常駐顯示的黃色安全提醒 */}
+            <div className="mx-4 mt-3 p-2.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 shrink-0">
+              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-[11px] leading-tight">
+                <b>安全提醒：</b>第 1 行為筆記標題（<b>不加密</b>）。請從第 2 行開始輸入機密資料。
+              </span>
+            </div>
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-              {/* 文字格式化工具列 */}
+              {/* 工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 <button
                   type="button"
@@ -567,7 +565,7 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Textarea */}
+              {/* Textarea 編輯器 */}
               <textarea
                 ref={textareaRef}
                 value={getDisplayedContent(activeNote)}
@@ -576,11 +574,7 @@ export default function Home() {
                 onKeyUp={updateSelection}
                 onSelect={updateSelection}
                 disabled={activeNote.isEncrypted && !passphrase}
-                placeholder={
-                  activeNote.isEncrypted 
-                    ? "第 1 行：筆記標題（未加密）\n第 2 行起：加密內容..."
-                    : "開始寫點什麼吧..."
-                }
+                placeholder="第 1 行：筆記標題（不加密）&#10;第 2 行起：機密內容..."
                 className="w-full flex-1 bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-20"
               />
 
@@ -590,9 +584,8 @@ export default function Home() {
               <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
               <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
 
-              {/* 右下角球形折疊工具箱 (FAB Floating Action Button) */}
+              {/* 右下角球型折疊工具箱 */}
               <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2">
-                {/* 展開後的 4 個子選單 */}
                 {isFabOpen && (
                   <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
                     <button
@@ -637,7 +630,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* 主球型按鈕 */}
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
