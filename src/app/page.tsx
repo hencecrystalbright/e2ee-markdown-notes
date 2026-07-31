@@ -312,8 +312,8 @@ export default function Home() {
         <div className="p-4 border-b border-neutral-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
-              <Lock className="w-5 h-5 text-emerald-400" />
-              <span>VaultNote</span>
+              <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
+              <span>TurtleNote</span>
             </div>
             <div className="flex items-center gap-1">
               <button 
@@ -614,7 +614,7 @@ export default function Home() {
                       disabled={activeNote.isEncrypted && !passphrase}
                       className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
-                      <span>拍照插入</span>
+                      <span>Camera</span>
                       <Camera className="w-4 h-4 text-emerald-400" />
                     </button>
 
@@ -624,7 +624,7 @@ export default function Home() {
                       disabled={activeNote.isEncrypted && !passphrase}
                       className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
-                      <span>相簿選擇</span>
+                      <span>Picture</span>
                       <ImageIcon className="w-4 h-4 text-emerald-400" />
                     </button>
                   </div>
