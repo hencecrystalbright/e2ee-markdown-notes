@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic'; // 👈 強制停用 API 快取，每次都讀取最新資料庫
 import { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
@@ -72,9 +71,10 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           setNotes(data);
-          if (data.length > 0) {
-            setActiveNoteId(data[0].id);
-          }
+          setActiveNoteId((prevId) => {
+            if (!prevId && data.length > 0) return data[0].id;
+            return prevId;
+          });
         }
       } catch (error) {
         console.error("載入筆記失敗:", error);
@@ -112,9 +112,13 @@ export default function Home() {
         setNotes((prev) => [savedNote, ...prev]);
         setActiveNoteId(savedNote.id);
         setIsSidebarOpen(false);
+      } else {
+        const errText = await response.text();
+        alert(`建立筆記失敗 (${response.status}): ${errText}`);
       }
     } catch (error) {
       console.error("新增筆記失敗:", error);
+      alert(`連線錯誤: ${error}`);
     }
   };
 
@@ -284,10 +288,13 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (!file || !activeNote) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    const markdownImageTag = `\n![${file.name}](${imageUrl})\n`;
-    
-    insertFormatting(markdownImageTag, "", "");
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Url = event.target?.result as string;
+      const markdownImageTag = `\n![${file.name}](${base64Url})\n`;
+      insertFormatting(markdownImageTag, "", "");
+    };
+    reader.readAsDataURL(file);
     e.target.value = '';
     setIsFabOpen(false);
   };
@@ -570,6 +577,7 @@ export default function Home() {
                 ref={textareaRef}
                 value={getDisplayedContent(activeNote)}
                 onChange={(e) => handleUpdateContent(e.target.value)}
+                onBlur={(e) => handleUpdateContent(e.target.value)}
                 onClick={updateSelection}
                 onKeyUp={updateSelection}
                 onSelect={updateSelection}
@@ -584,7 +592,7 @@ export default function Home() {
               <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
               <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
 
-              {/* 右下角球型折疊工具箱 (玩法 B：無綠底，烏龜本體懸浮按鈕) */}
+              {/* 右下角球型折疊工具箱 */}
               <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2">
                 {isFabOpen && (
                   <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
