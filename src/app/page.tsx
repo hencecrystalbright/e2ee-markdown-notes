@@ -592,7 +592,7 @@ function NoteApp() {
             <div className="mx-4 mt-3 p-2.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 shrink-0">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-[11px] leading-tight">
-                <b>安全提醒：</b>第 1 行為筆記標題（<b>不加密</b>）。請從第 2 行開始輸入機密資料。
+                <b>安全提醒：</b>第 1 行為筆記標題The first line is the title and is not encrypted.（<b>不加密</b>）。密碼忘記只能刪除!If you forget your password, you can only delete it!
               </span>
             </div>
 
