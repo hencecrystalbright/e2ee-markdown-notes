@@ -122,8 +122,8 @@ export default function LoginPage() {
           <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             端到端加密安全Personal Encrypted Notes
-            請記住自己密碼，若忘記將無法找回! 
-            Please remember your password, if you forget it, you will not be able to retrieve it!
+            若忘記密碼將無法找回! 
+            If you forget password, you will not be able to retrieve it!
           </p>
         </div>
 
