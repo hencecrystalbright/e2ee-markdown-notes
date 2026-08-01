@@ -121,7 +121,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-neutral-100 tracking-tight">TurtleNote</h1>
           <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            端到端加密 & 帳號隔離安全筆記庫
+            端到端加密安全筆記 Personal Encrypted Notes
           </p>
         </div>
 
