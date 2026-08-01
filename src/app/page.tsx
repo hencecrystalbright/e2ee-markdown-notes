@@ -744,7 +744,7 @@ export default function Home() {
 
                 {/* 懸浮時顯示的精美標籤文字 (Tooltip) */}
                 <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
-                  {viewMode === 'edit' ? '✏️ 編輯中Edit' : '👁️ 預覽中Preview'}
+                  {viewMode === 'edit' ? '✏️ 編輯中' : '👁️ 預覽中'}
                 </span>
               </div>
 
