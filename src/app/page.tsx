@@ -292,23 +292,48 @@ export default function Home() {
     setIsFabOpen(false);
   };
 
-  const handleInsertImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeNote) return;
+  const handleInsertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file || !activeNote) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      // 移除所有換行符號，確保 Data URL 為連續字串
-    const cleanBase64 = (event.target?.result as string).replace(/[\r\n]+/g, "");
-    
-    // 語法必須為 ![alt](data:image/...) 前後可加換行，但括號內不可有換行
-    const markdownImageTag = `\n![${file.name}](${cleanBase64})\n`;
-      insertFormatting(markdownImageTag, "", "");
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-    setIsFabOpen(false);
-  };
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    // 提示使用者上傳中
+    insertFormatting("\n![上傳中...]()\n", "", "");
+
+    // 使用免費公共 API 轉存 Imgur 圖床
+    const response = await fetch('https://api.imgur.com/3/image', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Client-ID 546c25a59c58ad7', // 公用 Imgur Client ID
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      const imageUrl = data.data.link; // 取得短網址 (例: https://i.imgur.com/...jpg)
+      
+      // 將「上傳中...」替換為真正的圖片語法
+      const updatedText = getDisplayedContent(activeNote).replace(
+        "![上傳中...]()",
+        `![${file.name}](${imageUrl})`
+      );
+      handleUpdateContent(updatedText);
+    } else {
+      alert("圖片上傳失敗，請重試！");
+    }
+  } catch (error) {
+    console.error("圖片上傳失敗:", error);
+    alert("圖片上傳失敗，請檢查網路連線。");
+  }
+
+  e.target.value = '';
+  setIsFabOpen(false);
+};
 
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
