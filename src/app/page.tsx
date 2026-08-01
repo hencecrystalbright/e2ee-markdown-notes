@@ -52,7 +52,12 @@ interface Note {
 
 // 核心主元件
 function NoteApp() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  useEffect(() => {
+  if (status === "unauthenticated") {
+    window.location.href = "/login";
+  }
+}, [status]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
