@@ -296,39 +296,54 @@ export default function Home() {
   const file = e.target.files?.[0];
   if (!file || !activeNote) return;
 
+  // 1. 先在文字編輯區插入上傳中佔位符
+  const loadingPlaceholder = `\n![⏳ 圖片上傳中...: ${file.name}]()\n`;
+  insertFormatting(loadingPlaceholder, "", "");
+
   const formData = new FormData();
   formData.append('image', file);
 
   try {
-    // 提示使用者上傳中
-    insertFormatting("\n![上傳中...]()\n", "", "");
-
-    // 使用免費公共 API 轉存 Imgur 圖床
+    // 2. 發送至 Imgur 公用 API
     const response = await fetch('https://api.imgur.com/3/image', {
       method: 'POST',
       headers: {
-        Authorization: 'Client-ID 546c25a59c58ad7', // 公用 Imgur Client ID
+        Authorization: 'Client-ID 546c25a59c58ad7',
       },
       body: formData,
     });
 
     const data = await response.json();
 
-    if (data.success) {
-      const imageUrl = data.data.link; // 取得短網址 (例: https://i.imgur.com/...jpg)
-      
-      // 將「上傳中...」替換為真正的圖片語法
-      const updatedText = getDisplayedContent(activeNote).replace(
-        "![上傳中...]()",
-        `![${file.name}](${imageUrl})`
-      );
-      handleUpdateContent(updatedText);
+    if (data.success && data.data?.link) {
+      const imageUrl = data.data.link; // 取得 Imgur 圖片 CDN 網址
+      const finalImageTag = `\n![${file.name}](${imageUrl})\n`;
+
+      // 3. 取得最新文字並精準替換佔位符
+      setNotes((prevNotes) => {
+        const currentNote = prevNotes.find((n) => n.id === activeNoteId);
+        if (!currentNote) return prevNotes;
+
+        const currentContent = currentNote.isEncrypted && passphrase 
+          ? decryptText(currentNote.content, passphrase)
+          : currentNote.content;
+
+        // 如果找不到佔位符，就直接接在最後面
+        const newRawText = currentContent.includes(loadingPlaceholder.trim())
+          ? currentContent.replace(loadingPlaceholder.trim(), finalImageTag.trim())
+          : `${currentContent}\n${finalImageTag}`;
+
+        // 呼叫 API 寫入雲端 PostgreSQL
+        handleUpdateContent(newRawText);
+
+        return prevNotes;
+      });
     } else {
-      alert("圖片上傳失敗，請重試！");
+      alert("圖片上傳 Imgur 失敗，請再試一次！");
     }
   } catch (error) {
     console.error("圖片上傳失敗:", error);
-    alert("圖片上傳失敗，請檢查網路連線。");
+    alert("網路連線異常，圖片上傳失敗。");
   }
 
   e.target.value = '';
