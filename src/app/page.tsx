@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Plus, 
-  FileText, 
-  Lock, 
-  Unlock, 
-  Trash2, 
-  Search, 
+import {
+  Plus,
+  FileText,
+  Lock,
+  Unlock,
+  Trash2,
+  Search,
   ShieldAlert,
   KeyRound,
   Eye,
@@ -25,8 +25,7 @@ import {
   AlignCenter,
   AlignRight,
   Menu,
-  X,
-  Edit3
+  X
 } from "lucide-react";
 import { encryptText, decryptText } from "@/lib/crypto";
 
@@ -34,7 +33,7 @@ import { encryptText, decryptText } from "@/lib/crypto";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-// 匯入HTML解析套件
+// 匯入 HTML 解析套件 (讓 mark, span, div 能在預覽渲染)
 import rehypeRaw from 'rehype-raw';
 
 // 匯入 Word 轉 Markdown 套件
@@ -137,9 +136,9 @@ export default function Home() {
     if (!activeNote) return;
 
     const title = rawText.split("\n")[0]?.replace(/^#*\s*/, "") || "無標題筆記";
-    
-    const finalContent = activeNote.isEncrypted && passphrase 
-      ? encryptText(rawText, passphrase) 
+
+    const finalContent = activeNote.isEncrypted && passphrase
+      ? encryptText(rawText, passphrase)
       : rawText;
 
     const updatedNoteData = {
@@ -240,9 +239,9 @@ export default function Home() {
     const selectedText = currentContent.substring(start, end) || defaultText;
     const replacement = `${prefix}${selectedText}${suffix}`;
 
-    const newContent = 
-      currentContent.substring(0, start) + 
-      replacement + 
+    const newContent =
+      currentContent.substring(0, start) +
+      replacement +
       currentContent.substring(end);
 
     handleUpdateContent(newContent);
@@ -296,121 +295,121 @@ export default function Home() {
   };
 
   const handleInsertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file || !activeNote) return;
+    const file = e.target.files?.[0];
+    if (!file || !activeNote) return;
 
-  // 1. 插入上傳中佔位符
-  const loadingPlaceholder = `\n![⏳ 圖片壓縮與上傳中...: ${file.name}]()\n`;
-  insertFormatting(loadingPlaceholder, "", "");
+    // 1. 插入上傳中佔位符
+    const loadingPlaceholder = `\n![⏳ 圖片壓縮與上傳中...: ${file.name}]()\n`;
+    insertFormatting(loadingPlaceholder, "", "");
 
-  try {
-    // 2. 利用 Canvas 在本地做圖片縮放與壓縮 (最長邊上限 1920px, 品質 80%)
-    const compressedBlob = await new Promise<Blob>((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
+    try {
+      // 2. 利用 Canvas 在本地做圖片縮放與壓縮 (最長邊上限 1920px, 品質 80%)
+      const compressedBlob = await new Promise<Blob>((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
 
-      reader.onload = (event) => {
-        img.src = event.target?.result as string;
-      };
-      reader.onerror = (err) => reject(err);
+        reader.onload = (event) => {
+          img.src = event.target?.result as string;
+        };
+        reader.onerror = (err) => reject(err);
 
-      img.onload = () => {
-        const maxWidth = 1920;
-        const maxHeight = 1920;
-        let width = img.width;
-        let height = img.height;
+        img.onload = () => {
+          const maxWidth = 1920;
+          const maxHeight = 1920;
+          let width = img.width;
+          let height = img.height;
 
-        // 計算等比例縮放尺寸
-        if (width > maxWidth || height > maxHeight) {
-          if (width / height > maxWidth / maxHeight) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          } else {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
+          // 計算等比例縮放尺寸
+          if (width > maxWidth || height > maxHeight) {
+            if (width / height > maxWidth / maxHeight) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
           }
-        }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error("Canvas context is null"));
-          return;
-        }
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error("Canvas context is null"));
+            return;
+          }
 
-        // 繪製縮放後的圖片
-        ctx.drawImage(img, 0, 0, width, height);
+          // 繪製縮放後的圖片
+          ctx.drawImage(img, 0, 0, width, height);
 
-        // 導出壓縮後的 JPEG 檔 (品質 0.8)
-        canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error("Canvas toBlob failed"));
-          },
-          'image/jpeg',
-          0.8
-        );
-      };
+          // 導出壓縮後的 JPEG 檔 (品質 0.8)
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error("Canvas toBlob failed"));
+            },
+            'image/jpeg',
+            0.8
+          );
+        };
 
-      reader.readAsDataURL(file);
-    });
-
-    // 3. 將壓縮後的 Blob 包裝成 FormData 送出給 Imgur
-    const formData = new FormData();
-    formData.append('image', compressedBlob, `${file.name.split('.')[0]}.jpg`);
-
-    const response = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Client-ID 546c25a59c58ad7',
-      },
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.success && data.data?.link) {
-      const imageUrl = data.data.link;
-      const finalImageTag = `\n![${file.name}](${imageUrl})\n`;
-
-      // 4. 精準替換佔位符為正式圖片網址
-      setNotes((prevNotes) => {
-        const currentNote = prevNotes.find((n) => n.id === activeNoteId);
-        if (!currentNote) return prevNotes;
-
-        const currentContent = currentNote.isEncrypted && passphrase 
-          ? decryptText(currentNote.content, passphrase)
-          : currentNote.content;
-
-        const newRawText = currentContent.includes(loadingPlaceholder.trim())
-          ? currentContent.replace(loadingPlaceholder.trim(), finalImageTag.trim())
-          : `${currentContent}\n${finalImageTag}`;
-
-        handleUpdateContent(newRawText);
-
-        return prevNotes;
+        reader.readAsDataURL(file);
       });
-    } else {
-      alert("圖片上傳失敗，請稍後再試！");
-    }
-  } catch (error) {
-    console.error("圖片壓縮/上傳失敗:", error);
-    alert("圖片處理異常，請檢查檔案格式。");
-  }
 
-  e.target.value = '';
-  setIsFabOpen(false);
-};
+      // 3. 將壓縮後的 Blob 包裝成 FormData 送出給 Imgur
+      const formData = new FormData();
+      formData.append('image', compressedBlob, `${file.name.split('.')[0]}.jpg`);
+
+      const response = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Client-ID 546c25a59c58ad7',
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data?.link) {
+        const imageUrl = data.data.link;
+        const finalImageTag = `\n![${file.name}](${imageUrl})\n`;
+
+        // 4. 精準替換佔位符為正式圖片網址
+        setNotes((prevNotes) => {
+          const currentNote = prevNotes.find((n) => n.id === activeNoteId);
+          if (!currentNote) return prevNotes;
+
+          const currentContent = currentNote.isEncrypted && passphrase
+            ? decryptText(currentNote.content, passphrase)
+            : currentNote.content;
+
+          const newRawText = currentContent.includes(loadingPlaceholder.trim())
+            ? currentContent.replace(loadingPlaceholder.trim(), finalImageTag.trim())
+            : `${currentContent}\n${finalImageTag}`;
+
+          handleUpdateContent(newRawText);
+
+          return prevNotes;
+        });
+      } else {
+        alert("圖片上傳失敗，請稍後再試！");
+      }
+    } catch (error) {
+      console.error("圖片壓縮/上傳失敗:", error);
+      alert("圖片處理異常，請檢查檔案格式。");
+    }
+
+    e.target.value = '';
+    setIsFabOpen(false);
+  };
 
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
-      
+
       {/* 手機版遮罩 Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -429,14 +428,14 @@ export default function Home() {
               <span>TurtleNote</span>
             </div>
             <div className="flex items-center gap-1">
-              <button 
+              <button
                 onClick={handleCreateNote}
                 className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                 title="新增筆記"
               >
                 <Plus className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 md:hidden"
               >
@@ -490,11 +489,10 @@ export default function Home() {
                   setActiveNoteId(note.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`p-3.5 cursor-pointer transition-colors ${
-                  activeNoteId === note.id
+                className={`p-3.5 cursor-pointer transition-colors ${activeNoteId === note.id
                     ? "bg-neutral-800/80 text-white"
                     : "hover:bg-neutral-800/40 text-neutral-400"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm truncate text-neutral-200">
@@ -535,15 +533,14 @@ export default function Home() {
                   {activeNote.title || "無標題筆記"}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={toggleEncryption}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${
-                    activeNote.isEncrypted
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${activeNote.isEncrypted
                       ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
                       : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
+                    }`}
                 >
                   {activeNote.isEncrypted ? (
                     <>
@@ -695,14 +692,14 @@ export default function Home() {
                   />
                 ) : (
                   <div className="prose prose-invert max-w-none pb-20 text-neutral-200">
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]} // 👈 關鍵！加入這行讓 HTML 標籤 (mark, span, div) 可以正確渲染
+                      rehypePlugins={[rehypeRaw]}
                       components={{
                         img: ({ node, ...props }) => (
-                          <img 
-                            {...props} 
-                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md" 
+                          <img
+                            {...props}
+                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
                             alt={props.alt || "Note Image"}
                           />
                         ),
@@ -723,26 +720,32 @@ export default function Home() {
               <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
               <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
 
-              {/* 左下角：編輯/預覽模式切換鈕 */}
-              <div className="fixed bottom-6 left-6 z-20 md:left-80">
+              {/* 左下角：烏龜2號 預覽/編輯模式切換鈕 */}
+              <div className="fixed bottom-6 left-6 z-20 md:left-80 flex items-center gap-2 group">
                 <button
                   type="button"
                   onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
-                  className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-neutral-900/90 border border-neutral-700/80 text-neutral-200 shadow-2xl backdrop-blur-md hover:bg-neutral-800 active:scale-95 transition-all"
-                  title={viewMode === 'edit' ? '切換至預覽模式' : '切換至編輯模式'}
+                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 relative"
+                  title={viewMode === 'edit' ? '點擊切換至預覽模式' : '點擊切換至編輯模式'}
                 >
-                  {viewMode === 'edit' ? (
-                    <>
-                      <Eye className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs font-medium">預覽模式</span>
-                    </>
-                  ) : (
-                    <>
-                      <Edit3 className="w-4 h-4 text-blue-400" />
-                      <span className="text-xs font-medium">編輯模式</span>
-                    </>
-                  )}
+                  <img
+                    src="/turtle2.svg"
+                    alt="Turtle Mode Switcher"
+                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                      }`}
+                  />
+
+                  {/* 烏龜角落的小狀態 Badge 點綴 */}
+                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
+                    }`}>
+                    {viewMode === 'edit' ? 'E' : 'S'}
+                  </span>
                 </button>
+
+                {/* 懸浮時顯示的精美標籤文字 (Tooltip) */}
+                <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
+                  {viewMode === 'edit' ? '✏️ 編輯中 (點烏龜預覽)' : '👁️ 預覽中 (點烏龜編輯)'}
+                </span>
               </div>
 
               {/* 右下角球型折疊工具箱 */}
@@ -795,9 +798,8 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
-                    isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
-                  }`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                    }`}
                   title="工具箱"
                 >
                   {isFabOpen ? (
@@ -805,10 +807,10 @@ export default function Home() {
                       <X className="w-6 h-6" />
                     </div>
                   ) : (
-                    <img 
-                      src="/turtle1.svg" 
-                      alt="Turtle Toolbox" 
-                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" 
+                    <img
+                      src="/turtle1.svg"
+                      alt="Turtle Toolbox"
+                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
                     />
                   )}
                 </button>
