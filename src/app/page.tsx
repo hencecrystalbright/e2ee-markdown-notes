@@ -34,6 +34,9 @@ import { encryptText, decryptText } from "@/lib/crypto";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+// 匯入HTML解析套件
+import rehypeRaw from 'rehype-raw';
+
 // 匯入 Word 轉 Markdown 套件
 import mammoth from 'mammoth';
 import TurndownService from 'turndown';
@@ -694,6 +697,7 @@ export default function Home() {
                   <div className="prose prose-invert max-w-none pb-20 text-neutral-200">
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]} // 👈 關鍵！加入這行讓 HTML 標籤 (mark, span, div) 可以正確渲染
                       components={{
                         img: ({ node, ...props }) => (
                           <img 
