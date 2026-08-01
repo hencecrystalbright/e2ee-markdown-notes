@@ -296,15 +296,69 @@ export default function Home() {
   const file = e.target.files?.[0];
   if (!file || !activeNote) return;
 
-  // 1. 先在文字編輯區插入上傳中佔位符
-  const loadingPlaceholder = `\n![⏳ 圖片上傳中...: ${file.name}]()\n`;
+  // 1. 插入上傳中佔位符
+  const loadingPlaceholder = `\n![⏳ 圖片壓縮與上傳中...: ${file.name}]()\n`;
   insertFormatting(loadingPlaceholder, "", "");
 
-  const formData = new FormData();
-  formData.append('image', file);
-
   try {
-    // 2. 發送至 Imgur 公用 API
+    // 2. 利用 Canvas 在本地做圖片縮放與壓縮 (最長邊上限 1920px, 品質 80%)
+    const compressedBlob = await new Promise<Blob>((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = (err) => reject(err);
+
+      img.onload = () => {
+        const maxWidth = 1920;
+        const maxHeight = 1920;
+        let width = img.width;
+        let height = img.height;
+
+        // 計算等比例縮放尺寸
+        if (width > maxWidth || height > maxHeight) {
+          if (width / height > maxWidth / maxHeight) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error("Canvas context is null"));
+          return;
+        }
+
+        // 繪製縮放後的圖片
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 導出壓縮後的 JPEG 檔 (品質 0.8)
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Canvas toBlob failed"));
+          },
+          'image/jpeg',
+          0.8
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    // 3. 將壓縮後的 Blob 包裝成 FormData 送出給 Imgur
+    const formData = new FormData();
+    formData.append('image', compressedBlob, `${file.name.split('.')[0]}.jpg`);
+
     const response = await fetch('https://api.imgur.com/3/image', {
       method: 'POST',
       headers: {
@@ -316,10 +370,10 @@ export default function Home() {
     const data = await response.json();
 
     if (data.success && data.data?.link) {
-      const imageUrl = data.data.link; // 取得 Imgur 圖片 CDN 網址
+      const imageUrl = data.data.link;
       const finalImageTag = `\n![${file.name}](${imageUrl})\n`;
 
-      // 3. 取得最新文字並精準替換佔位符
+      // 4. 精準替換佔位符為正式圖片網址
       setNotes((prevNotes) => {
         const currentNote = prevNotes.find((n) => n.id === activeNoteId);
         if (!currentNote) return prevNotes;
@@ -328,22 +382,20 @@ export default function Home() {
           ? decryptText(currentNote.content, passphrase)
           : currentNote.content;
 
-        // 如果找不到佔位符，就直接接在最後面
         const newRawText = currentContent.includes(loadingPlaceholder.trim())
           ? currentContent.replace(loadingPlaceholder.trim(), finalImageTag.trim())
           : `${currentContent}\n${finalImageTag}`;
 
-        // 呼叫 API 寫入雲端 PostgreSQL
         handleUpdateContent(newRawText);
 
         return prevNotes;
       });
     } else {
-      alert("圖片上傳 Imgur 失敗，請再試一次！");
+      alert("圖片上傳失敗，請稍後再試！");
     }
   } catch (error) {
-    console.error("圖片上傳失敗:", error);
-    alert("網路連線異常，圖片上傳失敗。");
+    console.error("圖片壓縮/上傳失敗:", error);
+    alert("圖片處理異常，請檢查檔案格式。");
   }
 
   e.target.value = '';
