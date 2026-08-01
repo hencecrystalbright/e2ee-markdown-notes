@@ -298,8 +298,11 @@ export default function Home() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Url = event.target?.result as string;
-      const markdownImageTag = `\n![${file.name}](${base64Url})\n`;
+      // 移除所有換行符號，確保 Data URL 為連續字串
+    const cleanBase64 = (event.target?.result as string).replace(/[\r\n]+/g, "");
+    
+    // 語法必須為 ![alt](data:image/...) 前後可加換行，但括號內不可有換行
+    const markdownImageTag = `\n![${file.name}](${cleanBase64})\n`;
       insertFormatting(markdownImageTag, "", "");
     };
     reader.readAsDataURL(file);
