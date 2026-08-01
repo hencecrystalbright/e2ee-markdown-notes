@@ -1,10 +1,20 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // 👈 如果你的 .env 裡面寫的是 POSTGRES_URL，請改成 env("POSTGRES_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_DATABASE_URL") // 👈 改成這行！這是 Vercel Prisma Integration 的標準變數
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // 經由 bcrypt 加密後的密碼
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  notes     Note[]
 }
 
 model Note {
@@ -14,4 +24,7 @@ model Note {
   isEncrypted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  userId      String   // 連結至 User 的 ID
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
