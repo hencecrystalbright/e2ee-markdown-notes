@@ -9,7 +9,7 @@ generator client {
 
 model User {
   id        String   @id @default(cuid())
-  email     String   @unique
+  email     String   @unique // 👈 這個 unique 確保了帳號在資料庫絕不會重複！
   password  String   // 經由 bcrypt 加密後的密碼
   name      String?
   createdAt DateTime @default(now())

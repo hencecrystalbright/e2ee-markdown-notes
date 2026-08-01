@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { User, Lock, ArrowRight, ShieldCheck } from "lucide-react";
+import { User, Lock, ArrowRight, ShieldCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,9 +15,42 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // 帳號即時重複驗證 State
+  const [checkingAccount, setCheckingAccount] = useState(false);
+  const [isAccountAvailable, setIsAccountAvailable] = useState<boolean | null>(null);
+
+  // 當使用者在註冊模式下輸入帳號時，自動進行 debounce 驗證
+  useEffect(() => {
+    if (!isRegister || !account.trim()) {
+      setIsAccountAvailable(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setCheckingAccount(true);
+      try {
+        const res = await fetch(`/api/register?checkAccount=${encodeURIComponent(account.trim())}`);
+        const data = await res.json();
+        setIsAccountAvailable(data.available);
+      } catch (err) {
+        setIsAccountAvailable(null);
+      } finally {
+        setCheckingAccount(false);
+      }
+    }, 400); // 停止打字 0.4 秒後自動檢查
+
+    return () => clearTimeout(timer);
+  }, [account, isRegister]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
+
+    if (isRegister && isAccountAvailable === false) {
+      setErrorMsg("此帳號已被註冊，請選用其他帳號名稱");
+      return;
+    }
+
     setLoading(true);
 
     if (isRegister) {
@@ -95,7 +128,7 @@ export default function LoginPage() {
         <div className="grid grid-cols-2 p-1 bg-neutral-950 rounded-xl border border-neutral-800 mb-6">
           <button
             type="button"
-            onClick={() => { setIsRegister(false); setErrorMsg(""); }}
+            onClick={() => { setIsRegister(false); setErrorMsg(""); setIsAccountAvailable(null); }}
             className={`py-2 text-xs font-semibold rounded-lg transition-all ${
               !isRegister 
                 ? "bg-emerald-600 text-white shadow-md" 
@@ -106,7 +139,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
-            onClick={() => { setIsRegister(true); setErrorMsg(""); }}
+            onClick={() => { setIsRegister(true); setErrorMsg(""); setIsAccountAvailable(null); }}
             className={`py-2 text-xs font-semibold rounded-lg transition-all ${
               isRegister 
                 ? "bg-emerald-600 text-white shadow-md" 
@@ -124,17 +157,43 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 帳號 (Account) 輸入欄 */}
+          {/* 帳號 (Account) 輸入欄 + 即時驗證圖示 */}
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1.5">使用者帳號 (Account)</label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-xs font-medium text-neutral-400">使用者帳號 (Account)</label>
+              {isRegister && account.trim() && (
+                <span className="text-[10px]">
+                  {checkingAccount ? (
+                    <span className="text-neutral-500 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" /> 檢查中...
+                    </span>
+                  ) : isAccountAvailable === true ? (
+                    <span className="text-emerald-400 font-medium flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> 帳號可以使用
+                    </span>
+                  ) : isAccountAvailable === false ? (
+                    <span className="text-red-400 font-medium flex items-center gap-1">
+                      <XCircle className="w-3 h-3" /> 帳號已被使用
+                    </span>
+                  ) : null}
+                </span>
+              )}
+            </div>
+
             <div className="relative">
               <input
                 type="text"
                 required
-                placeholder="請輸入您的帳號名稱Please enter your account name..."
+                placeholder="請輸入您的帳號名稱"
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
+                className={`w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border rounded-xl focus:outline-none transition-colors ${
+                  isRegister && isAccountAvailable === false 
+                    ? "border-red-500/80 focus:border-red-500 text-neutral-200" 
+                    : isRegister && isAccountAvailable === true
+                    ? "border-emerald-500/80 focus:border-emerald-500 text-neutral-200"
+                    : "border-neutral-800 focus:border-emerald-500 text-neutral-200"
+                }`}
               />
               <User className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
             </div>
@@ -147,7 +206,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
-                placeholder={isRegister ? "密碼長度至少 6 個字 at least 6 characters" : "輸入您的密碼..."}
+                placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼..."}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
@@ -158,7 +217,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (isRegister && isAccountAvailable === false)}
             className="w-full py-3 px-4 mt-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
