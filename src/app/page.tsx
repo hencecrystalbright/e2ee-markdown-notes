@@ -738,13 +738,13 @@ export default function Home() {
                   {/* 烏龜角落的小狀態 Badge 點綴 */}
                   <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
                     }`}>
-                    {viewMode === 'edit' ? 'E' : 'P'}
+                    {viewMode === 'edit' ? 'Edit' : 'Preview'}
                   </span>
                 </button>
 
                 {/* 懸浮時顯示的精美標籤文字 (Tooltip) */}
                 <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
-                  {viewMode === 'edit' ? '✏️ 編輯中 (click to preview)' : '👁️ 預覽中 (click to edit)'}
+                  {viewMode === 'edit' ? '✏️ 編輯中Edit' : '👁️ 預覽中Preview'}
                 </span>
               </div>
 
