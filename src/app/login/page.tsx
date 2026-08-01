@@ -3,15 +3,14 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Mail, User, Lock, ArrowRight, ShieldCheck } from "lucide-react";
+import { User, Lock, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   
-  const [email, setEmail] = useState("");
+  const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -26,7 +25,7 @@ export default function LoginPage() {
         const res = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name }),
+          body: JSON.stringify({ email: account, password, name: account }),
         });
 
         const data = await res.json();
@@ -38,7 +37,7 @@ export default function LoginPage() {
         }
 
         const signInRes = await signIn("credentials", {
-          email,
+          email: account,
           password,
           redirect: false,
         });
@@ -58,13 +57,13 @@ export default function LoginPage() {
     } else {
       try {
         const result = await signIn("credentials", {
-          email,
+          email: account,
           password,
           redirect: false,
         });
 
         if (result?.error) {
-          setErrorMsg("Email 或密碼錯誤，請重新確認");
+          setErrorMsg("帳號或密碼錯誤，請重新確認");
         } else {
           router.push("/");
           router.refresh();
@@ -125,45 +124,30 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegister && (
-            <div>
-              <label className="block text-xs font-medium text-neutral-400 mb-1.5">您的暱稱</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required={isRegister}
-                  placeholder="例如：小烏龜"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
-                />
-                <User className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
-              </div>
-            </div>
-          )}
-
+          {/* 帳號 (Account) 輸入欄 */}
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1.5">電子郵件 (Email)</label>
+            <label className="block text-xs font-medium text-neutral-400 mb-1.5">使用者帳號 (Account)</label>
             <div className="relative">
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="turtle@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="請輸入您的帳號名稱Please enter your account name..."
+                value={account}
+                onChange={(e) => setAccount(e.target.value)}
                 className="w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
               />
-              <Mail className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
             </div>
           </div>
 
+          {/* 密碼 輸入欄 */}
           <div>
             <label className="block text-xs font-medium text-neutral-400 mb-1.5">帳號密碼</label>
             <div className="relative">
               <input
                 type="password"
                 required
-                placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼..."}
+                placeholder={isRegister ? "密碼長度至少 6 個字 at least 6 characters" : "輸入您的密碼..."}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
