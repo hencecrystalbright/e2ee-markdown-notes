@@ -688,10 +688,10 @@ export default function Home() {
                     onSelect={updateSelection}
                     disabled={activeNote.isEncrypted && !passphrase}
                     placeholder="第 1 行：筆記標題（不加密）&#10;第 2 行起：機密內容..."
-                    className="w-full h-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-20"
+                    className="w-full h-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-30"
                   />
                 ) : (
-                  <div className="prose prose-invert max-w-none pb-20 text-neutral-200">
+                  <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
