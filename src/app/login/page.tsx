@@ -201,7 +201,7 @@ export default function LoginPage() {
 
           {/* 密碼 輸入欄 */}
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼</label>
+            <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼(Password)</label>
             <div className="relative">
               <input
                 type="password"
