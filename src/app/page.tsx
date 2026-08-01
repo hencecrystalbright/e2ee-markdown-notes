@@ -25,9 +25,14 @@ import {
   AlignCenter,
   AlignRight,
   Menu,
-  X
+  X,
+  Edit3
 } from "lucide-react";
 import { encryptText, decryptText } from "@/lib/crypto";
+
+// 匯入 Markdown 渲染套件
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // 匯入 Word 轉 Markdown 套件
 import mammoth from 'mammoth';
@@ -48,6 +53,9 @@ export default function Home() {
   const [passphrase, setPassphrase] = useState("");
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [textColor, setTextColor] = useState("#ef4444");
+
+  // 模式 State：編輯 (edit) 與 預覽 (preview)
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
 
   // RWD 相關 State：側邊欄開關與右下角 FAB 工具箱開關
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -572,25 +580,71 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Textarea 編輯器 */}
-              <textarea
-                ref={textareaRef}
-                value={getDisplayedContent(activeNote)}
-                onChange={(e) => handleUpdateContent(e.target.value)}
-                onBlur={(e) => handleUpdateContent(e.target.value)}
-                onClick={updateSelection}
-                onKeyUp={updateSelection}
-                onSelect={updateSelection}
-                disabled={activeNote.isEncrypted && !passphrase}
-                placeholder="第 1 行：筆記標題（不加密）&#10;第 2 行起：機密內容..."
-                className="w-full flex-1 bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-20"
-              />
+              {/* 編輯器 / 預覽器 切換顯示區域 */}
+              <div className="flex-1 overflow-y-auto">
+                {viewMode === 'edit' ? (
+                  <textarea
+                    ref={textareaRef}
+                    value={getDisplayedContent(activeNote)}
+                    onChange={(e) => handleUpdateContent(e.target.value)}
+                    onBlur={(e) => handleUpdateContent(e.target.value)}
+                    onClick={updateSelection}
+                    onKeyUp={updateSelection}
+                    onSelect={updateSelection}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    placeholder="第 1 行：筆記標題（不加密）&#10;第 2 行起：機密內容..."
+                    className="w-full h-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-20"
+                  />
+                ) : (
+                  <div className="prose prose-invert max-w-none pb-20 text-neutral-200">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        img: ({ node, ...props }) => (
+                          <img 
+                            {...props} 
+                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md" 
+                            alt={props.alt || "Note Image"}
+                          />
+                        ),
+                        a: ({ node, ...props }) => (
+                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300" />
+                        )
+                      }}
+                    >
+                      {getDisplayedContent(activeNote)}
+                    </ReactMarkdown>
+                  </div>
+                )}
+              </div>
 
               {/* 隱藏 Inputs */}
               <input type="file" ref={fileInputRef} onChange={handleImportMarkdown} accept=".md,.txt" className="hidden" />
               <input type="file" ref={wordInputRef} onChange={handleImportWord} accept=".docx" className="hidden" />
               <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
               <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
+
+              {/* 左下角：編輯/預覽模式切換鈕 */}
+              <div className="fixed bottom-6 left-6 z-20 md:left-80">
+                <button
+                  type="button"
+                  onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
+                  className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-neutral-900/90 border border-neutral-700/80 text-neutral-200 shadow-2xl backdrop-blur-md hover:bg-neutral-800 active:scale-95 transition-all"
+                  title={viewMode === 'edit' ? '切換至預覽模式' : '切換至編輯模式'}
+                >
+                  {viewMode === 'edit' ? (
+                    <>
+                      <Eye className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-medium">預覽模式</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className="w-4 h-4 text-blue-400" />
+                      <span className="text-xs font-medium">編輯模式</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
               {/* 右下角球型折疊工具箱 */}
               <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2">
