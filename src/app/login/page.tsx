@@ -121,7 +121,9 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-neutral-100 tracking-tight">TurtleNote</h1>
           <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            端到端加密 & 帳號隔離安全筆記庫
+            端到端加密安全Personal Encrypted Notes
+            請記住自己密碼，若忘記將無法找回! 
+            Please remember your password, if you forget it, you will not be able to retrieve it!
           </p>
         </div>
 
@@ -201,12 +203,12 @@ export default function LoginPage() {
 
           {/* 密碼 輸入欄 + 切換顯隱按鈕 */}
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1.5">帳號密碼</label>
+            <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼(Password)</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"} // 👈 動態切換 text / password
                 required
-                placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼..."}
+                placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼 at least 6 characters..."}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
