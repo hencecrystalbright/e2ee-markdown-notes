@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signOut } from "next-auth/react";
-import { 
-  Plus, 
-  FileText, 
-  Lock, 
-  Unlock, 
-  Trash2, 
-  Search, 
+import {
+  Plus,
+  FileText,
+  Lock,
+  Unlock,
+  Trash2,
+  Search,
   ShieldAlert,
   KeyRound,
   Eye,
@@ -177,9 +177,9 @@ function NoteApp() {
     if (!activeNote) return;
 
     const title = rawText.split("\n")[0]?.replace(/^#*\s*/, "") || "無標題筆記";
-    
-    const finalContent = activeNote.isEncrypted && passphrase 
-      ? encryptText(rawText, passphrase) 
+
+    const finalContent = activeNote.isEncrypted && passphrase
+      ? encryptText(rawText, passphrase)
       : rawText;
 
     const updatedNoteData = {
@@ -272,7 +272,7 @@ function NoteApp() {
 
     const userMsg: ChatMessage = { role: 'user', content: messageToSend };
     const newHistory = [...chatMessages, userMsg];
-    
+
     setChatMessages(newHistory);
     if (!overridePrompt) setInputMessage("");
     setIsAiThinking(true);
@@ -324,9 +324,9 @@ function NoteApp() {
     const selectedText = currentContent.substring(start, end) || defaultText;
     const replacement = `${prefix}${selectedText}${suffix}`;
 
-    const newContent = 
-      currentContent.substring(0, start) + 
-      replacement + 
+    const newContent =
+      currentContent.substring(0, start) +
+      replacement +
       currentContent.substring(end);
 
     handleUpdateContent(newContent);
@@ -458,7 +458,7 @@ function NoteApp() {
           const currentNote = prevNotes.find((n) => n.id === activeNoteId);
           if (!currentNote) return prevNotes;
 
-          const currentContent = currentNote.isEncrypted && passphrase 
+          const currentContent = currentNote.isEncrypted && passphrase
             ? decryptText(currentNote.content, passphrase)
             : currentNote.content;
 
@@ -484,10 +484,10 @@ function NoteApp() {
 
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
-      
+
       {/* 手機版遮罩 Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -505,9 +505,9 @@ function NoteApp() {
               <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
               <span>TurtleNote</span>
             </div>
-            
+
             <div className="flex items-center gap-1">
-              <button 
+              <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
                 title="登出帳號"
@@ -515,15 +515,15 @@ function NoteApp() {
                 <LogOut className="w-4 h-4" />
               </button>
 
-              <button 
+              <button
                 onClick={handleCreateNote}
                 className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                 title="新增筆記"
               >
                 <Plus className="w-5 h-5" />
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 md:hidden"
               >
@@ -583,11 +583,10 @@ function NoteApp() {
                   setActiveNoteId(note.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`p-3.5 cursor-pointer transition-colors ${
-                  activeNoteId === note.id
+                className={`p-3.5 cursor-pointer transition-colors ${activeNoteId === note.id
                     ? "bg-neutral-800/80 text-white"
                     : "hover:bg-neutral-800/40 text-neutral-400"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm truncate text-neutral-200">
@@ -628,11 +627,10 @@ function NoteApp() {
                   {activeNote.title || "無標題筆記"}
                 </span>
               </div>
-              
+
               {/* 🤖 頂部 AI 快捷圖示選單（受 AI 安全開關控制） */}
-              <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${
-                !isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
-              }`}>
+              <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${!isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
+                }`}>
                 {/* 1. Summary */}
                 <button
                   onClick={() => handleSendAiMessage("請幫我提煉這篇筆記的核心重點與摘要。")}
@@ -708,11 +706,10 @@ function NoteApp() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={toggleEncryption}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${
-                    activeNote.isEncrypted
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${activeNote.isEncrypted
                       ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
                       : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
+                    }`}
                 >
                   {activeNote.isEncrypted ? (
                     <>
@@ -746,26 +743,9 @@ function NoteApp() {
             </div>
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-              {/* 工具列：最左側為【 AI 保密/啟用安全開關 】 */}
+              {/* 工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
-                
-                {/* 🛡️ AI 功能總安全開關鈕 */}
-                <button
-                  type="button"
-                  onClick={() => setIsAiEnabled(!isAiEnabled)}
-                  className={`px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${
-                    isAiEnabled
-                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
-                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                  }`}
-                  title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
-                >
-                  <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
-                  <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
-                </button>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-
+                {/* 粗體 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting("**", "**", "粗體文字")}
@@ -776,6 +756,7 @@ function NoteApp() {
                   <Bold className="w-4 h-4" />
                 </button>
 
+                {/* 斜體 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting("*", "*", "斜體文字")}
@@ -786,6 +767,7 @@ function NoteApp() {
                   <Italic className="w-4 h-4" />
                 </button>
 
+                {/* 刪除線 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting("~~", "~~", "刪除線文字")}
@@ -796,6 +778,7 @@ function NoteApp() {
                   <Strikethrough className="w-4 h-4" />
                 </button>
 
+                {/* 高亮 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting("<mark>", "</mark>", "高亮文字")}
@@ -808,6 +791,7 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
+                {/* 文字顏色 */}
                 <div className="relative flex items-center shrink-0">
                   <button
                     type="button"
@@ -832,6 +816,7 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
+                {/* 向左對齊 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', '向左對齊內容')}
@@ -842,6 +827,7 @@ function NoteApp() {
                   <AlignLeft className="w-4 h-4" />
                 </button>
 
+                {/* 置中對齊 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting('\n<div align="center">\n', '\n</div>\n', '置中對齊內容')}
@@ -852,6 +838,7 @@ function NoteApp() {
                   <AlignCenter className="w-4 h-4" />
                 </button>
 
+                {/* 向右對齊 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting('\n<div align="right">\n', '\n</div>\n', '向右對齊內容')}
@@ -860,6 +847,22 @@ function NoteApp() {
                   title="向右對齊"
                 >
                   <AlignRight className="w-4 h-4" />
+                </button>
+
+                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                {/* 🛡️ AI 保密/啟用安全開關 (移至最右側) */}
+                <button
+                  type="button"
+                  onClick={() => setIsAiEnabled(!isAiEnabled)}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${isAiEnabled
+                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
+                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    }`}
+                  title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
+                >
+                  <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
+                  <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
                 </button>
               </div>
 
@@ -880,14 +883,14 @@ function NoteApp() {
                   />
                 ) : (
                   <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         img: ({ node, ...props }) => (
-                          <img 
-                            {...props} 
-                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md" 
+                          <img
+                            {...props}
+                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
                             alt={props.alt || "Note Image"}
                           />
                         ),
@@ -916,17 +919,15 @@ function NoteApp() {
                   className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 relative"
                   title={viewMode === 'edit' ? '點擊切換至預覽模式' : '點擊切換至編輯模式'}
                 >
-                  <img 
-                    src="/turtle2.svg" 
-                    alt="Turtle Mode Switcher" 
-                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
-                      viewMode === 'preview' ? 'scale-105 rotate-6' : ''
-                    }`}
+                  <img
+                    src="/turtle2.svg"
+                    alt="Turtle Mode Switcher"
+                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                      }`}
                   />
-                  
-                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${
-                    viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
-                  }`}>
+
+                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
+                    }`}>
                     {viewMode === 'edit' ? '編' : '閱'}
                   </span>
                 </button>
@@ -985,9 +986,8 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
-                    isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
-                  }`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                    }`}
                   title="工具箱"
                 >
                   {isFabOpen ? (
@@ -995,10 +995,10 @@ function NoteApp() {
                       <X className="w-6 h-6" />
                     </div>
                   ) : (
-                    <img 
-                      src="/turtle1.svg" 
-                      alt="Turtle Toolbox" 
-                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" 
+                    <img
+                      src="/turtle1.svg"
+                      alt="Turtle Toolbox"
+                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
                     />
                   )}
                 </button>
@@ -1008,7 +1008,7 @@ function NoteApp() {
               <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end">
                 {isChatOpen && (
                   <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                    
+
                     {/* Chat Header */}
                     <div className="p-3.5 bg-neutral-950/90 border-b border-neutral-800 flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-2">
@@ -1042,11 +1042,10 @@ function NoteApp() {
                           className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${
-                              msg.role === 'user'
+                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${msg.role === 'user'
                                 ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
                                 : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
-                            }`}
+                              }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1099,11 +1098,10 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsChatOpen(!isChatOpen)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
-                    isChatOpen
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isChatOpen
                       ? "bg-indigo-600 text-white scale-105"
                       : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
-                  }`}
+                    }`}
                   title="開啟 TurtleAI 筆記助手"
                 >
                   <Bot className="w-6 h-6" />
