@@ -39,6 +39,7 @@ export async function POST(request: Request) {
         model: "deepseek-chat",
         messages: payloadMessages,
         temperature: 0.7,
+        max_tokens: 1024, // 👈 限制 AI 一次最多只能回傳約 500~700 個字，防止長篇大論燒 Token
       }),
     });
 
