@@ -83,7 +83,7 @@ function NoteApp() {
   const [isAiEnabled, setIsAiEnabled] = useState(false); // 🔒 預設關閉 AI 功能以防誤傳
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: '你好！我是 TurtleAI 筆記助手 🐢。請先開啟 AI 安全開關，即可點擊頂部圖示幫你摘要、潤飾或翻譯喔！' }
+    { role: 'assistant', content: 'Hi！I'm TurtleAI assistant 🐢。AI ON/OFF，即可點擊頂部圖示幫你摘要、潤飾或翻譯喔！' }
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isAiThinking, setIsAiThinking] = useState(false);
