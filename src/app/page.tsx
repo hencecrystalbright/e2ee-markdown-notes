@@ -27,15 +27,23 @@ import {
   AlignRight,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Bot,
+  Send,
+  Sparkles,
+  Loader2,
+  Smile,
+  Briefcase,
+  Languages,
+  ListTree,
+  Sliders,
+  Power
 } from "lucide-react";
 import { encryptText, decryptText } from "@/lib/crypto";
 
 // 匯入 Markdown 渲染套件
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-// 匯入 HTML 解析套件 (讓 mark, span, div 能在預覽渲染)
 import rehypeRaw from 'rehype-raw';
 
 // 匯入 Word 轉 Markdown 套件
@@ -50,14 +58,13 @@ interface Note {
   isEncrypted: boolean;
 }
 
-// 核心主元件
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 function NoteApp() {
   const { data: session, status } = useSession();
-  useEffect(() => {
-  if (status === "unauthenticated") {
-    window.location.href = "/login";
-  }
-}, [status]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,9 +75,19 @@ function NoteApp() {
   // 模式 State：編輯 (edit) 與 預覽 (preview)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
 
-  // RWD 相關 State：側邊欄開關與右下角 FAB 工具箱開關
+  // RWD 與工具箱 State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
+
+  // --- AI 開關與 Chatbox 相關 State ---
+  const [isAiEnabled, setIsAiEnabled] = useState(false); // 🔒 預設關閉 AI 功能以防誤傳
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', content: '你好！我是 TurtleAI 筆記助手 🐢。請先開啟 AI 安全開關，即可點擊頂部圖示幫你摘要、潤飾或翻譯喔！' }
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   // References
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,8 +97,21 @@ function NoteApp() {
   const colorInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 記錄游標選取位置
   const lastSelectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
+
+  // 未登入自動重導向
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      window.location.href = "/login";
+    }
+  }, [status]);
+
+  // 聊天訊息自動滾動到底部
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, isAiThinking]);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -100,8 +130,10 @@ function NoteApp() {
       }
     };
 
-    fetchNotes();
-  }, []);
+    if (status === "authenticated") {
+      fetchNotes();
+    }
+  }, [status]);
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
@@ -209,7 +241,7 @@ function NoteApp() {
   };
 
   const handleDeleteNote = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
+    if (!confirm("確定要刪除這份筆記嗎？")) return;
 
     try {
       const response = await fetch(`/api/notes/${id}`, {
@@ -225,6 +257,50 @@ function NoteApp() {
       }
     } catch (error) {
       console.error("刪除筆記失敗:", error);
+    }
+  };
+
+  // --- 發送 AI 訊息 ---
+  const handleSendAiMessage = async (overridePrompt?: string) => {
+    if (!isAiEnabled) {
+      alert("⚠️ AI 功能目前處於【關閉/保密狀態】。請先點擊下方編輯器工具列最左側的『 AI 開關 』圖示以啟用。");
+      return;
+    }
+
+    const messageToSend = overridePrompt || inputMessage;
+    if (!messageToSend.trim() || isAiThinking) return;
+
+    const userMsg: ChatMessage = { role: 'user', content: messageToSend };
+    const newHistory = [...chatMessages, userMsg];
+    
+    setChatMessages(newHistory);
+    if (!overridePrompt) setInputMessage("");
+    setIsAiThinking(true);
+    if (!isChatOpen) setIsChatOpen(true);
+
+    try {
+      const currentNoteText = activeNote ? getDisplayedContent(activeNote) : "";
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newHistory,
+          noteContext: currentNoteText,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.reply) {
+        setChatMessages([...newHistory, { role: 'assistant', content: data.reply }]);
+      } else {
+        setChatMessages([...newHistory, { role: 'assistant', content: `❌ AI 回應失敗: ${data.error || '未知錯誤'}` }]);
+      }
+    } catch (err) {
+      setChatMessages([...newHistory, { role: 'assistant', content: '❌ 連線失敗，請檢查網路。' }]);
+    } finally {
+      setIsAiThinking(false);
     }
   };
 
@@ -456,7 +532,6 @@ function NoteApp() {
             </div>
           </div>
 
-          {/* 顯示當前登入者 Email/暱稱 */}
           {session?.user && (
             <div className="text-[11px] text-neutral-400 bg-neutral-950/60 px-2.5 py-1 rounded-md border border-neutral-800/80 truncate">
               👤 登入者：<span className="text-emerald-400 font-medium">{session.user.name || session.user.email}</span>
@@ -539,8 +614,8 @@ function NoteApp() {
       <main className="flex-1 flex flex-col h-full bg-neutral-950 min-w-0">
         {activeNote ? (
           <>
-            <header className="h-14 border-b border-neutral-800 px-4 flex items-center justify-between bg-neutral-900/30 shrink-0">
-              <div className="flex items-center gap-2.5 truncate">
+            <header className="h-14 border-b border-neutral-800 px-4 flex items-center justify-between bg-neutral-900/30 shrink-0 gap-2">
+              <div className="flex items-center gap-2.5 truncate shrink-0">
                 <button
                   onClick={() => setIsSidebarOpen(true)}
                   className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 md:hidden"
@@ -549,12 +624,88 @@ function NoteApp() {
                   <Menu className="w-5 h-5" />
                 </button>
                 <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
-                <span className="font-medium text-sm text-neutral-300 truncate">
+                <span className="font-medium text-sm text-neutral-300 truncate max-w-[100px] sm:max-w-[180px]">
                   {activeNote.title || "無標題筆記"}
                 </span>
               </div>
               
-              <div className="flex items-center gap-2">
+              {/* 🤖 頂部 AI 快捷圖示選單（受 AI 安全開關控制） */}
+              <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${
+                !isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
+              }`}>
+                {/* 1. Summary */}
+                <button
+                  onClick={() => handleSendAiMessage("請幫我提煉這篇筆記的核心重點與摘要。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-indigo-950/80 border border-indigo-500/60 text-indigo-400 hover:bg-indigo-900/80 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Summary"
+                >
+                  <Sparkles className="w-4 h-4" />
+                </button>
+
+                {/* 2. Simple */}
+                <button
+                  onClick={() => handleSendAiMessage("請用通俗易懂、簡潔白話的語言重新表達這篇筆記。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-emerald-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Simple"
+                >
+                  <Smile className="w-4 h-4" />
+                </button>
+
+                {/* 3. Pro */}
+                <button
+                  onClick={() => handleSendAiMessage("請把這篇筆記轉化為商務、嚴謹、專業的報告口吻。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-amber-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Pro"
+                >
+                  <Briefcase className="w-4 h-4" />
+                </button>
+
+                {/* 4. ENG */}
+                <button
+                  onClick={() => handleSendAiMessage("請將這篇筆記內容流暢翻譯為英文版本，並保持原本的 Markdown 格式。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-blue-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="ENG"
+                >
+                  <Languages className="w-4 h-4" />
+                </button>
+
+                {/* 5. Outline */}
+                <button
+                  onClick={() => handleSendAiMessage("請將這篇筆記內文拆解為結構清晰的大綱架構 (Headings & Bullets)。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-purple-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Outline"
+                >
+                  <ListTree className="w-4 h-4" />
+                </button>
+
+                {/* 6. Edited 1 */}
+                <button
+                  onClick={() => handleSendAiMessage("請幫我檢查這篇筆記的錯別字與語法流暢度。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Edited 1"
+                >
+                  <Sliders className="w-4 h-4" />
+                </button>
+
+                {/* 7. Edited 2 */}
+                <button
+                  onClick={() => handleSendAiMessage("請幫我提出根據這篇筆記可執行的後續行動與建議。")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Edited 2"
+                >
+                  <Sliders className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* 加密 & 刪除按鈕 */}
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={toggleEncryption}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${
@@ -566,14 +717,12 @@ function NoteApp() {
                   {activeNote.isEncrypted ? (
                     <>
                       <Lock className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">已使用 AES-256 加密</span>
-                      <span className="sm:hidden">加密</span>
+                      <span className="hidden lg:inline">已加密</span>
                     </>
                   ) : (
                     <>
                       <Unlock className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">未加密 (點擊啟用)</span>
-                      <span className="sm:hidden">未加密</span>
+                      <span className="hidden lg:inline">未加密</span>
                     </>
                   )}
                 </button>
@@ -588,17 +737,35 @@ function NoteApp() {
               </div>
             </header>
 
-            {/* 常駐顯示的黃色安全提醒 */}
+            {/* 常駐顯示的安全提醒 */}
             <div className="mx-4 mt-3 p-2.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 shrink-0">
               <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-[11px] leading-tight">
-                <b>安全提醒：</b>第 1 行為筆記標題The first line is the title and is not encrypted.（<b>不加密</b>）。密碼忘記只能刪除!If you forget your password, you can only delete it!
+                <b>安全提醒：</b>第 1 行為筆記標題（<b>不加密</b>）。請從第 2 行開始輸入機密資料。
               </span>
             </div>
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-              {/* 工具列 */}
+              {/* 工具列：最左側為【 AI 保密/啟用安全開關 】 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
+                
+                {/* 🛡️ AI 功能總安全開關鈕 */}
+                <button
+                  type="button"
+                  onClick={() => setIsAiEnabled(!isAiEnabled)}
+                  className={`px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${
+                    isAiEnabled
+                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
+                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                  }`}
+                  title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
+                >
+                  <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
+                  <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
+                </button>
+
+                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
                 <button
                   type="button"
                   onClick={() => insertFormatting("**", "**", "粗體文字")}
@@ -837,6 +1004,112 @@ function NoteApp() {
                 </button>
               </div>
 
+              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 */}
+              <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end">
+                {isChatOpen && (
+                  <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    
+                    {/* Chat Header */}
+                    <div className="p-3.5 bg-neutral-950/90 border-b border-neutral-800 flex items-center justify-between shrink-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                          <Bot className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-bold text-neutral-100 flex items-center gap-1.5">
+                            TurtleAI 助手
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
+                          </h3>
+                          <p className="text-[10px] text-neutral-400">
+                            {isAiEnabled ? "🟢 AI ON · 已開啟當前筆記感知" : "🔴 AI OFF · 狀態保護中 (禁止傳送內容)"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setIsChatOpen(false)}
+                        className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Chat 訊息內容區 */}
+                    <div ref={chatScrollRef} className="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs leading-relaxed">
+                      {chatMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${
+                              msg.role === 'user'
+                                ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
+                                : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
+                            }`}
+                          >
+                            <div className="prose prose-invert max-w-none text-xs">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {msg.content}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {isAiThinking && (
+                        <div className="flex justify-start">
+                          <div className="bg-neutral-800/90 text-neutral-400 rounded-2xl rounded-bl-none px-3.5 py-2.5 border border-neutral-700/60 flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                            <span>TurtleAI 思考中...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Chat Footer 輸入框 */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendAiMessage();
+                      }}
+                      className="p-3 bg-neutral-950/90 border-t border-neutral-800 flex items-center gap-2 shrink-0"
+                    >
+                      <input
+                        type="text"
+                        placeholder={isAiEnabled ? "詢問 AI 或輸入指令..." : "🔒 AI 功能目前關閉中..."}
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        disabled={isAiThinking || !isAiEnabled}
+                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-neutral-200 focus:outline-none focus:border-indigo-500 placeholder-neutral-500 disabled:opacity-50"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!inputMessage.trim() || isAiThinking || !isAiEnabled}
+                        className="p-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-xl transition-all disabled:opacity-40"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </form>
+
+                  </div>
+                )}
+
+                {/* 懸浮開關按鈕 */}
+                <button
+                  type="button"
+                  onClick={() => setIsChatOpen(!isChatOpen)}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
+                    isChatOpen
+                      ? "bg-indigo-600 text-white scale-105"
+                      : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
+                  }`}
+                  title="開啟 TurtleAI 筆記助手"
+                >
+                  <Bot className="w-6 h-6" />
+                </button>
+              </div>
+
             </div>
           </>
         ) : (
@@ -849,7 +1122,6 @@ function NoteApp() {
   );
 }
 
-// 導出包覆 SessionProvider 的 Home 主頁面
 export default function Home() {
   return (
     <SessionProvider>
