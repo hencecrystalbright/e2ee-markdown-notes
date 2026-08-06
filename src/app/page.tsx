@@ -260,10 +260,11 @@ function NoteApp() {
     }
   };
 
-  // --- 發送 AI 訊息 ---
+  // --- 發送 AI 訊息（含前端防護與自動關閉機制） ---
   const handleSendAiMessage = async (overridePrompt?: string) => {
+    // 🛡️ 1. 前端嚴格防護：如果 AI 開關處於關閉狀態，直接攔截，絕不發起 API 請求！
     if (!isAiEnabled) {
-      alert("⚠️ AI 功能目前處於【關閉/保密狀態】。請先點擊下方編輯器工具列最左側的『 AI 開關 』圖示以啟用。");
+      alert("⚠️ AI 功能目前處於【關閉/保密狀態】。請先點擊工具列右側的『 AI 開關 』圖示以啟用。");
       return;
     }
 
@@ -295,10 +296,16 @@ function NoteApp() {
       if (res.ok && data.reply) {
         setChatMessages([...newHistory, { role: 'assistant', content: data.reply }]);
       } else {
-        setChatMessages([...newHistory, { role: 'assistant', content: `❌ AI 回應失敗: ${data.error || '未知錯誤'}` }]);
+        // 🔒 2. 當超過每日 10 次限制 (Status 429) 時，強制切換 AI 開關為 AI OFF！
+        if (res.status === 429) {
+          setIsAiEnabled(false);
+        }
+
+        // 顯示後端傳回的友善提示
+        setChatMessages([...newHistory, { role: 'assistant', content: data.error || '❌ AI 回應失敗，請稍後再試。' }]);
       }
     } catch (err) {
-      setChatMessages([...newHistory, { role: 'assistant', content: '❌ 連線失敗，請檢查網路。' }]);
+      setChatMessages([...newHistory, { role: 'assistant', content: '❌ 連線失敗，請檢查網路狀態。' }]);
     } finally {
       setIsAiThinking(false);
     }
@@ -584,8 +591,8 @@ function NoteApp() {
                   setIsSidebarOpen(false);
                 }}
                 className={`p-3.5 cursor-pointer transition-colors ${activeNoteId === note.id
-                    ? "bg-neutral-800/80 text-white"
-                    : "hover:bg-neutral-800/40 text-neutral-400"
+                  ? "bg-neutral-800/80 text-white"
+                  : "hover:bg-neutral-800/40 text-neutral-400"
                   }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -707,8 +714,8 @@ function NoteApp() {
                 <button
                   onClick={toggleEncryption}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${activeNote.isEncrypted
-                      ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
-                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
+                    ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
+                    : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
                     }`}
                 >
                   {activeNote.isEncrypted ? (
@@ -856,8 +863,8 @@ function NoteApp() {
                   type="button"
                   onClick={() => setIsAiEnabled(!isAiEnabled)}
                   className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${isAiEnabled
-                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
-                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    ? "bg-emerald-600 text-white shadow-emerald-950/50"
+                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
                     }`}
                   title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
                 >
@@ -1043,8 +1050,8 @@ function NoteApp() {
                         >
                           <div
                             className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${msg.role === 'user'
-                                ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
-                                : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
+                              ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
+                              : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
                               }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
@@ -1099,8 +1106,8 @@ function NoteApp() {
                   type="button"
                   onClick={() => setIsChatOpen(!isChatOpen)}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isChatOpen
-                      ? "bg-indigo-600 text-white scale-105"
-                      : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
+                    ? "bg-indigo-600 text-white scale-105"
+                    : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
                     }`}
                   title="開啟 TurtleAI 筆記助手"
                 >
