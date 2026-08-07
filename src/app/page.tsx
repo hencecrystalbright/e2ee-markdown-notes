@@ -175,7 +175,7 @@ function NoteApp() {
 
   const handleCreateNote = async () => {
     const newNoteData = {
-      title: "無標題筆記",
+      title: "Please key in title",
       content: "",
       isEncrypted: false,
       tags: [],
