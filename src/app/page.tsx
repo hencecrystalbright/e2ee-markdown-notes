@@ -152,7 +152,7 @@ function NoteApp() {
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
   // 拆分標題與內文 Helper (未設定時預設回傳空字串 "")
-  coconst getNoteTitleAndBody = (note?: Note) => {
+  const getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
       const parts = note.content.split("\n");
