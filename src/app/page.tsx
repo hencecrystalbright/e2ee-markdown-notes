@@ -163,7 +163,7 @@ function NoteApp() {
 
     // 已加密筆記
     if (!passphrase) {
-      return { title: note.title || "無標題筆記", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
+      return { title: note.title || "Please key in title", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
     }
 
     const decrypted = decryptText(note.content, passphrase);
@@ -175,7 +175,7 @@ function NoteApp() {
 
   const handleCreateNote = async () => {
     const newNoteData = {
-      title: "Please key in title",
+      title: "Please key in title無標題",
       content: "",
       isEncrypted: false,
       tags: [],
@@ -208,7 +208,7 @@ function NoteApp() {
     if (!activeNote) return;
 
     const fullRawText = `${newTitle}\n${newBody}`;
-    const titleForDb = newTitle.trim() || "無標題筆記";
+    const titleForDb = newTitle.trim() || "Please key in title 無標題筆記";
 
     const finalContent = activeNote.isEncrypted && passphrase 
       ? encryptText(fullRawText, passphrase) 
@@ -1163,7 +1163,7 @@ function NoteApp() {
                       onKeyUp={updateSelection}
                       onSelect={updateSelection}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      placeholder="從這裡開始輸入機密內容（會隨設定加密，保護隱私）..."
+                      placeholder="從這裡開始輸入機密內容（會隨設定加密，保護隱私）...The following is protected by AES-256 encryption. Please enter the passphrase to decrypt and edit the content."
                       className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
                     />
                   </div>
