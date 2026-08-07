@@ -239,7 +239,7 @@ function NoteApp() {
     handleUpdateContent(getDisplayedContent(activeNote), newTags);
   };
 
-  // 🛡️ 智慧 URL 辨識建議 Tag (更精準匹配 Gmail、Google 等常見服務)
+  // 🛡️ 智慧 URL 辨識建議 Tag
   const detectUrlTag = (content: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const match = content.match(urlRegex);
@@ -957,7 +957,7 @@ function NoteApp() {
               {/* 格式工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 
-                {/* 🔑 帳密範本一鍵插入按鈕 (修正為 Markdown 雙換行結構) */}
+                {/* 🔑 帳密範本一鍵插入按鈕 */}
                 <button
                   type="button"
                   onClick={() => insertFormatting("\n\nURL: https://\n\nAccount: ", "\n\nSecret: \n\n", "your_username")}
@@ -1106,7 +1106,7 @@ function NoteApp() {
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
-                        // 📋 預覽模式一鍵複製卡片 (自動支援單行獨立配對)
+                        // 🐢 預覽模式一鍵複製卡片 (加入烏龜 Icon 與 30 秒倒數)
                         p: ({ node, children, ...props }) => {
                           const rawText = Array.isArray(children) ? children.join('') : String(children || '');
                           const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
@@ -1125,23 +1125,28 @@ function NoteApp() {
                                 <button
                                   type="button"
                                   onClick={() => handleCopySecureText(value, keyId)}
-                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1 transition-all shrink-0 ${
+                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-all shrink-0 ${
                                     copiedKey === keyId
                                       ? "bg-emerald-600 text-white font-bold"
-                                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
+                                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700/60"
                                   }`}
                                   title="點擊複製（30秒後自動清空剪貼簿）"
                                 >
+                                  {/* 🐢 複製按鈕專屬小烏龜 Icon */}
+                                  <img 
+                                    src="/turtle.svg" 
+                                    alt="Turtle Icon" 
+                                    className={`w-3.5 h-3.5 object-contain transition-transform ${
+                                      copiedKey === keyId ? "scale-125 rotate-12" : ""
+                                    }`} 
+                                  />
                                   {copiedKey === keyId ? (
                                     <>
-                                      <Check className="w-3.5 h-3.5 text-white" />
+                                      <Check className="w-3 h-3 text-white" />
                                       <span>已複製 (30s)</span>
                                     </>
                                   ) : (
-                                    <>
-                                      <Copy className="w-3.5 h-3.5" />
-                                      <span>複製</span>
-                                    </>
+                                    <span>複製</span>
                                   )}
                                 </button>
                               </p>
