@@ -239,7 +239,7 @@ function NoteApp() {
     handleUpdateContent(getDisplayedContent(activeNote), newTags);
   };
 
-  // 🛡️ 智慧 URL 辨識建議 Tag
+  // 🛡️ 智慧 URL 辨識建議 Tag (更精準匹配 Gmail、Google 等常見服務)
   const detectUrlTag = (content: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const match = content.match(urlRegex);
@@ -247,7 +247,15 @@ function NoteApp() {
 
     try {
       const url = new URL(match[0]);
-      const hostParts = url.hostname.replace('www.', '').split('.');
+      const hostname = url.hostname.toLowerCase();
+
+      if (hostname.includes('mail.google.com')) return 'Gmail';
+      if (hostname.includes('google.com')) return 'Google';
+      if (hostname.includes('github.com')) return 'Github';
+      if (hostname.includes('aws.amazon.com')) return 'AWS';
+      if (hostname.includes('facebook.com')) return 'Facebook';
+
+      const hostParts = hostname.replace('www.', '').split('.');
       if (hostParts.length >= 2) {
         const domainName = hostParts[0];
         return domainName.charAt(0).toUpperCase() + domainName.slice(1);
@@ -263,7 +271,6 @@ function NoteApp() {
     navigator.clipboard.writeText(text);
     setCopiedKey(keyIdentifier);
 
-    // 倒數 30 秒自動清空剪貼簿
     setTimeout(() => {
       navigator.clipboard.writeText("");
       setCopiedKey(null);
@@ -551,7 +558,6 @@ function NoteApp() {
     setIsFabOpen(false);
   };
 
-  // 取得全站所有出現過的 Tags 清單
   const allTags = Array.from(
     new Set(notes.flatMap((n) => n.tags || []))
   );
@@ -706,7 +712,6 @@ function NoteApp() {
                   )}
                 </div>
 
-                {/* 顯示筆記帶有的 Tags */}
                 {note.tags && note.tags.length > 0 && (
                   <div className="flex items-center gap-1 mb-1.5 flex-wrap">
                     {note.tags.map((t) => (
@@ -952,10 +957,10 @@ function NoteApp() {
               {/* 格式工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 
-                {/* 🔑 帳密範本一鍵插入按鈕 */}
+                {/* 🔑 帳密範本一鍵插入按鈕 (修正為 Markdown 雙換行結構) */}
                 <button
                   type="button"
-                  onClick={() => insertFormatting("\nURL: https://\nAccount: ", "\nSecret: \n", "your_username")}
+                  onClick={() => insertFormatting("\n\nURL: https://\n\nAccount: ", "\n\nSecret: \n\n", "your_username")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
                   title="插入結構化帳號密碼範本"
@@ -1101,10 +1106,10 @@ function NoteApp() {
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
-                        // 📋 預覽模式下自動偵測 Account/Secret 並渲染一鍵複製按鈕 (含 30 秒自動清空機制)
+                        // 📋 預覽模式一鍵複製卡片 (自動支援單行獨立配對)
                         p: ({ node, children, ...props }) => {
                           const rawText = Array.isArray(children) ? children.join('') : String(children || '');
-                          const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText);
+                          const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
 
                           if (isAccountOrSecret) {
                             const label = isAccountOrSecret[1];
@@ -1112,27 +1117,29 @@ function NoteApp() {
                             const keyId = `${activeNote.id}_${label}_${value}`;
 
                             return (
-                              <p className="flex items-center gap-2 bg-neutral-900/90 border border-neutral-800 p-2 rounded-lg font-mono text-xs my-1.5" {...props}>
-                                <span className="text-emerald-400 font-semibold">{label}:</span>
-                                <span className="flex-1 truncate text-neutral-200">{value}</span>
+                              <p className="flex items-center justify-between gap-2 bg-neutral-900/90 border border-neutral-800 px-3 py-2 rounded-lg font-mono text-xs my-2 shadow-md max-w-lg" {...props}>
+                                <div className="flex items-center gap-2 truncate flex-1">
+                                  <span className="text-emerald-400 font-semibold shrink-0">{label}:</span>
+                                  <span className="truncate text-neutral-200">{value}</span>
+                                </div>
                                 <button
                                   type="button"
                                   onClick={() => handleCopySecureText(value, keyId)}
-                                  className={`px-2 py-1 rounded text-[11px] flex items-center gap-1 transition-all shrink-0 ${
+                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1 transition-all shrink-0 ${
                                     copiedKey === keyId
-                                      ? "bg-emerald-600 text-white"
+                                      ? "bg-emerald-600 text-white font-bold"
                                       : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
                                   }`}
                                   title="點擊複製（30秒後自動清空剪貼簿）"
                                 >
                                   {copiedKey === keyId ? (
                                     <>
-                                      <Check className="w-3 h-3 text-white" />
+                                      <Check className="w-3.5 h-3.5 text-white" />
                                       <span>已複製 (30s)</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Copy className="w-3 h-3" />
+                                      <Copy className="w-3.5 h-3.5" />
                                       <span>複製</span>
                                     </>
                                   )}
