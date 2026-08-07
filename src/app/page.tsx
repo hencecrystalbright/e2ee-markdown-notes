@@ -1169,10 +1169,10 @@ function NoteApp() {
                                   {copiedKey === keyId ? (
                                     <>
                                       <Check className="w-3 h-3 text-white" />
-                                      <span>已複製 (30s)</span>
+                                      <span>COPIED (30s)</span>
                                     </>
                                   ) : (
-                                    <span>複製</span>
+                                    <span>COPY</span>
                                   )}
                                 </button>
                               </p>
