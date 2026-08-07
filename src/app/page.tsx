@@ -41,7 +41,9 @@ import {
   Tag as TagIcon,
   Copy,
   Check,
-  Key
+  Key,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { encryptText, decryptText } from "@/lib/crypto";
 
@@ -85,7 +87,8 @@ function NoteApp() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
 
-  // Tag 輸入與 30秒自動清空剪貼簿 State
+  // 🏷️ Tag 控制列動態折疊 State (預設隱藏，極簡版面)
+  const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -863,98 +866,100 @@ function NoteApp() {
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
               
-              {/* 🏷️ 三層式 Tag 標籤管理列 */}
-              <div className="p-2.5 bg-neutral-900/60 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0">
-                
-                {/* 1. 已綁定的 Tags & 新增輸入框 */}
-                <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                  <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              {/* 🏷️ 動態折疊 Tag 標籤控制列 (展開時顯示，平時收合節省版面) */}
+              {isTagSectionOpen && (
+                <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
                   
-                  {activeNote.tags?.map((t) => (
-                    <span
-                      key={t}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
-                    >
-                      #{t}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(t)}
-                        className="hover:text-red-400 transition-colors"
+                  {/* 已綁定的 Tags & 新增輸入框 */}
+                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                    <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    
+                    {activeNote.tags?.map((t) => (
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
+                        #{t}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(t)}
+                          className="hover:text-red-400 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
 
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleAddTag(tagInput);
-                    }}
-                    className="inline-flex items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="+ 自訂 Tag..."
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
-                    />
-                  </form>
-                </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAddTag(tagInput);
+                      }}
+                      className="inline-flex items-center"
+                    >
+                      <input
+                        type="text"
+                        placeholder="+ 自訂 Tag..."
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
+                      />
+                    </form>
+                  </div>
 
-                {/* 2. 預設類型膠囊 & 智慧 URL 建議 */}
-                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1 border-t border-neutral-800/60 text-[11px]">
-                  <span className="text-neutral-500 text-[10px] shrink-0">常用類型:</span>
-                  
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("Password")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
-                  >
-                    🔑 #Password
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("AuthKey")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
-                  >
-                    ⚡ #AuthKey
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("SSH_Key")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
-                  >
-                    🛡️ #SSH_Key
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("CreditCard")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
-                  >
-                    💳 #CreditCard
-                  </button>
-
-                  {/* 💡 智慧 URL 自動辨識建議按鈕 */}
-                  {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
+                  {/* 常用類型膠囊 & 智慧 URL 建議 */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1 border-t border-neutral-800/60 text-[11px]">
+                    <span className="text-neutral-500 text-[10px] shrink-0">常用類型:</span>
+                    
                     <button
                       type="button"
-                      onClick={() => handleAddTag(detectedDomainTag)}
-                      className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-600/80 text-indigo-300 hover:bg-indigo-900 transition-all shrink-0 flex items-center gap-1 animate-pulse"
+                      onClick={() => handleAddTag("Password")}
+                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
                     >
-                      <span>💡 偵測到網址，加入</span>
-                      <span className="font-bold">#{detectedDomainTag}</span>
+                      🔑 #Password
                     </button>
-                  )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddTag("AuthKey")}
+                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
+                    >
+                      ⚡ #AuthKey
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddTag("SSH_Key")}
+                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
+                    >
+                      🛡️ #SSH_Key
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddTag("CreditCard")}
+                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
+                    >
+                      💳 #CreditCard
+                    </button>
+
+                    {/* 💡 智慧 URL 自動辨識建議按鈕 */}
+                    {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
+                      <button
+                        type="button"
+                        onClick={() => handleAddTag(detectedDomainTag)}
+                        className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-600/80 text-indigo-300 hover:bg-indigo-900 transition-all shrink-0 flex items-center gap-1 animate-pulse"
+                      >
+                        <span>💡 偵測到網址，加入</span>
+                        <span className="font-bold">#{detectedDomainTag}</span>
+                      </button>
+                    )}
+                  </div>
+
                 </div>
+              )}
 
-              </div>
-
-              {/* 格式工具列 */}
+              {/* 格式工具列 (整合 Tag 折疊按鈕 + AI ON/OFF) */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 
                 {/* 🔑 帳密範本一鍵插入按鈕 */}
@@ -1069,6 +1074,26 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
+                {/* 🏷️ Tag 標籤動態折疊按鈕 (放在 AI ON/OFF 前面) */}
+                <button
+                  type="button"
+                  onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
+                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${
+                    isTagSectionOpen
+                      ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
+                      : (activeNote.tags && activeNote.tags.length > 0)
+                        ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
+                        : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                  }`}
+                  title={isTagSectionOpen ? "點擊收合 Tag 面板" : "點擊展開 Tag 面板"}
+                >
+                  <TagIcon className="w-3.5 h-3.5" />
+                  <span>Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}</span>
+                  {isTagSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
+                </button>
+
+                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
                 {/* 🛡️ AI 保密/啟用安全開關 (最右側) */}
                 <button
                   type="button"
@@ -1106,7 +1131,7 @@ function NoteApp() {
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
-                        // 🐢 預覽模式一鍵複製卡片 (加入烏龜 Icon 與 30 秒倒數)
+                        // 🐢 預覽模式一鍵複製卡片 (帶烏龜 Icon)
                         p: ({ node, children, ...props }) => {
                           const rawText = Array.isArray(children) ? children.join('') : String(children || '');
                           const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
@@ -1132,7 +1157,6 @@ function NoteApp() {
                                   }`}
                                   title="點擊複製（30秒後自動清空剪貼簿）"
                                 >
-                                  {/* 🐢 複製按鈕專屬小烏龜 Icon */}
                                   <img 
                                     src="/turtle.svg" 
                                     alt="Turtle Icon" 
