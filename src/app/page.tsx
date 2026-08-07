@@ -1067,7 +1067,7 @@ function NoteApp() {
                   {/* 🔑 帳密範本一鍵插入按鈕 */}
                 <button
                   type="button"
-                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "your_username")}
+                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
                   title="插入結構化帳號密碼範本"
