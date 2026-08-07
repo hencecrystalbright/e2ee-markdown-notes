@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 // PUT: 更新單一筆記
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -13,23 +13,25 @@ export async function PUT(
   }
 
   try {
+    const { id } = await params; // 👈 關鍵修正：使用 await 解開 Promise
     const { title, content, isEncrypted, tags } = await request.json();
 
     const updatedNote = await prisma.note.update({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
       data: {
         title,
         content,
         isEncrypted,
-        tags: tags || [], // 👈 支援更新 tags
+        tags: tags || [],
       },
     });
 
     return NextResponse.json(updatedNote);
   } catch (error) {
+    console.error("更新筆記失敗:", error);
     return NextResponse.json({ error: "更新筆記失敗" }, { status: 500 });
   }
 }
@@ -37,7 +39,7 @@ export async function PUT(
 // DELETE: 刪除單一筆記
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -45,15 +47,17 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params; // 👈 關鍵修正：使用 await 解開 Promise
     await prisma.note.delete({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("刪除筆記失敗:", error);
     return NextResponse.json({ error: "刪除筆記失敗" }, { status: 500 });
   }
 }
