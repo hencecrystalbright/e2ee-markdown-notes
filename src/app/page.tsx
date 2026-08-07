@@ -152,14 +152,16 @@ function NoteApp() {
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
   // 拆分標題與內文 Helper (未設定時預設回傳空字串 "")
-  const getNoteTitleAndBody = (note?: Note) => {
+  coconst getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
       const parts = note.content.split("\n");
-      const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
+      // 確保如果第一行是空字串，不要強迫回傳 "無標題筆記"
+      const title = parts[0]?.replace(/^#*\s*/, "") || "";
       const body = parts.slice(1).join("\n");
       return { title, body };
     }
+    // ...
 
     if (!passphrase) {
       return { title: note.title || "", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
