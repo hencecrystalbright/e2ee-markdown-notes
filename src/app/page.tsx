@@ -1144,7 +1144,7 @@ function NoteApp() {
                           }
                         }}
                         disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder="筆記標題（不加密，僅供搜尋）...Please key in title . "
+                        placeholder="筆記標題（不加密，僅供搜尋）...Title (not encrypted). "
                         className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
                       />
                     </div>
