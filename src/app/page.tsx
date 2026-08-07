@@ -1067,13 +1067,13 @@ function NoteApp() {
                   {/* 🔑 帳密範本一鍵插入按鈕 */}
                 <button
                   type="button"
-                  onClick={() => insertFormatting("\n\nURL: https://\n\nAccount: ", "\n\nSecret: \n\n", "your_username")}
+                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "your_username")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
                   title="插入結構化帳號密碼範本"
                 >
                   <Key className="w-3.5 h-3.5 text-amber-400" />
-                  <span>SERCET</span>
+                  <span>Sercet</span>
                 </button>
 
                 {/* 🏷️ Tag 標籤動態折疊按鈕 (放在 AI ON/OFF 前面) */}
