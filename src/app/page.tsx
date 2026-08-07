@@ -689,8 +689,25 @@ function NoteApp() {
 
         <div className="flex-1 overflow-y-auto divide-y divide-neutral-800/50">
           {notes
-            .filter((n) => n.title.toLowerCase().includes(searchTerm.toLowerCase()))
-            .filter((n) => selectedTagFilter === null || (n.tags && n.tags.includes(selectedTagFilter)))
+            .filter((n) => {
+              // 1. Tag 標籤過濾
+              if (selectedTagFilter !== null && (!n.tags || !n.tags.includes(selectedTagFilter))) {
+                return false;
+              }
+
+              // 2. 搜尋關鍵字比對 (標題 + 解密內文 + Tag)
+              if (!searchTerm.trim()) return true;
+
+              const term = searchTerm.toLowerCase();
+              const titleMatch = n.title.toLowerCase().includes(term);
+              const tagMatch = n.tags?.some((t) => t.toLowerCase().includes(term));
+
+              // 取得解密後的內文 (若是加密筆記且已輸入 Passphrase 則自動解密後比對)
+              const displayedContent = getDisplayedContent(n).toLowerCase();
+              const contentMatch = displayedContent.includes(term);
+
+              return titleMatch || tagMatch || contentMatch;
+            })
             .map((note) => (
               <div
                 key={note.id}
