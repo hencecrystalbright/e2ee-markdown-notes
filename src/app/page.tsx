@@ -151,26 +151,20 @@ function NoteApp() {
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
-  // 拆分標題與內文 Helper
+  // 拆分標題與內文 Helper (未設定時預設回傳空字串 "")
   const getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
       const parts = note.content.split("\n");
-      const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "Please key in title"; // 👈 初始標題這裡修改
+      const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
       const body = parts.slice(1).join("\n");
       return { title, body };
     }
 
     if (!passphrase) {
-      return { title: note.title || "Please key in title", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" }; // 👈 初始標題這裡修改
+      return { title: note.title || "", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
     }
 
-    const decrypted = decryptText(note.content, passphrase);
-    const parts = decrypted.split("\n");
-    const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "Please key in title"; // 👈 初始標題這裡修改
-    const body = parts.slice(1).join("\n");
-    return { title, body };
-  };
     const decrypted = decryptText(note.content, passphrase);
     const parts = decrypted.split("\n");
     const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
@@ -178,9 +172,10 @@ function NoteApp() {
     return { title, body };
   };
 
+  // 建立新筆記 (標題預設為空字串 "")
   const handleCreateNote = async () => {
     const newNoteData = {
-      title: "Please key in title",// 👈 初始標題這裡修改
+      title: "",
       content: "",
       isEncrypted: false,
       tags: [],
@@ -208,12 +203,12 @@ function NoteApp() {
     }
   };
 
-  // 組合標題與內文並更新後端
+  // 組合標題與內文並更新後端 (未填寫標題時儲存為 "")
   const handleSaveNoteData = async (newTitle: string, newBody: string, updatedTags?: string[]) => {
     if (!activeNote) return;
 
     const fullRawText = `${newTitle}\n${newBody}`;
-    const titleForDb = newTitle.trim() || "Please key in title"; // 👈 初始標題這裡修改
+    const titleForDb = newTitle.trim();
 
     const finalContent = activeNote.isEncrypted && passphrase 
       ? encryptText(fullRawText, passphrase) 
@@ -738,7 +733,7 @@ function NoteApp() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm truncate text-neutral-200">
-                    {note.title || "無標題筆記"}
+                    {note.title || "Please key in title"}
                   </span>
                   {note.isEncrypted ? (
                     <Lock className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -783,7 +778,7 @@ function NoteApp() {
                 </button>
                 <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
                 <span className="font-medium text-sm text-neutral-300 truncate max-w-[100px] sm:max-w-[180px]">
-                  {activeNoteData.title || "無標題筆記"}
+                  {activeNoteData.title || "Please key in title"}
                 </span>
               </div>
               
@@ -1128,12 +1123,12 @@ function NoteApp() {
                 </button>
               </div>
 
-              {/* 編輯器 / 預覽器 切換顯示區域 (包含可滾動的橘框標題與內文框) */}
+              {/* 編輯器 / 預覽器 切換顯示區域 */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {viewMode === 'edit' ? (
                   <div className="flex flex-col gap-3 min-h-full pb-30">
                     
-                    {/* 🟠 1. 獨立的橘框標題列 (鍵盤按 Tab 即可切換到下方內文框) */}
+                    {/* 🟠 1. 獨立橘框標題列：未來若要更改提示，只需要更改這一行的 placeholder 屬性即可！ */}
                     <div className="relative shrink-0">
                       <input
                         ref={titleInputRef}
@@ -1147,7 +1142,7 @@ function NoteApp() {
                           }
                         }}
                         disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder="⚠️ 筆記標題（不加密，僅供搜尋，有字時提示自動消失）..."
+                        placeholder="筆記標題（不加密，僅供搜尋）...Please key in title . "
                         className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
                       />
                     </div>
@@ -1175,7 +1170,7 @@ function NoteApp() {
                 ) : (
                   <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
                     <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
-                      {activeNoteData.title || "無標題筆記"}
+                      {activeNoteData.title || "Please key in title"}
                     </h1>
 
                     <ReactMarkdown 
