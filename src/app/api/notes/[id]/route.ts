@@ -1,44 +1,59 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
-
+// PUT: 更新單一筆記
 export async function PUT(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "未授權" }, { status: 401 });
+  }
+
   try {
-    const { id } = await context.params; // 👈 修正 TypeScript 型別驗證
-    const body = await request.json();
-    
+    const { title, content, isEncrypted, tags } = await request.json();
+
     const updatedNote = await prisma.note.update({
-      where: { id },
+      where: {
+        id: params.id,
+        userId: session.user.id,
+      },
       data: {
-        title: body.title,
-        content: body.content,
-        isEncrypted: body.isEncrypted,
-        updatedAt: new Date(),
+        title,
+        content,
+        isEncrypted,
+        tags: tags || [], // 👈 支援更新 tags
       },
     });
+
     return NextResponse.json(updatedNote);
   } catch (error) {
-    console.error("PUT API Error:", error);
-    return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
+    return NextResponse.json({ error: "更新筆記失敗" }, { status: 500 });
   }
 }
 
+// DELETE: 刪除單一筆記
 export async function DELETE(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "未授權" }, { status: 401 });
+  }
+
   try {
-    const { id } = await context.params; // 👈 修正 TypeScript 型別驗證
     await prisma.note.delete({
-      where: { id },
+      where: {
+        id: params.id,
+        userId: session.user.id,
+      },
     });
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE API Error:", error);
-    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
+    return NextResponse.json({ error: "刪除筆記失敗" }, { status: 500 });
   }
 }

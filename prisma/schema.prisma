@@ -19,12 +19,13 @@ model User {
 
 model Note {
   id          String   @id @default(cuid())
+  userId      String
   title       String
   content     String   @db.Text
   isEncrypted Boolean  @default(false)
+  tags        String[] @default([])   // 👈 新增：儲存標籤陣列 (例如 ["Password", "AWS"])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  userId      String   // 連結至 User 的 ID
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
