@@ -87,7 +87,7 @@ function NoteApp() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
 
-  // 🏷️ Tag 控制列動態折疊 State (預設隱藏，極簡版面)
+  // 🏷️ Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -108,6 +108,7 @@ function NoteApp() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const lastSelectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
@@ -150,11 +151,26 @@ function NoteApp() {
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
-  const getDisplayedContent = (note?: Note) => {
-    if (!note) return "";
-    if (!note.isEncrypted) return note.content;
-    if (!passphrase) return "🔒 內容已加密，請在左側輸入金鑰以解密檢視。";
-    return decryptText(note.content, passphrase);
+  // 拆分標題與內文 Helper
+  const getNoteTitleAndBody = (note?: Note) => {
+    if (!note) return { title: "", body: "" };
+    if (!note.isEncrypted) {
+      const parts = note.content.split("\n");
+      const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
+      const body = parts.slice(1).join("\n");
+      return { title, body };
+    }
+
+    // 已加密筆記
+    if (!passphrase) {
+      return { title: note.title || "無標題筆記", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
+    }
+
+    const decrypted = decryptText(note.content, passphrase);
+    const parts = decrypted.split("\n");
+    const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
+    const body = parts.slice(1).join("\n");
+    return { title, body };
   };
 
   const handleCreateNote = async () => {
@@ -187,20 +203,22 @@ function NoteApp() {
     }
   };
 
-  const handleUpdateContent = async (rawText: string, updatedTags?: string[]) => {
+  // 組合標題與內文並更新後端
+  const handleSaveNoteData = async (newTitle: string, newBody: string, updatedTags?: string[]) => {
     if (!activeNote) return;
 
-    const title = rawText.split("\n")[0]?.replace(/^#*\s*/, "") || "無標題筆記";
-    
+    const fullRawText = `${newTitle}\n${newBody}`;
+    const titleForDb = newTitle.trim() || "無標題筆記";
+
     const finalContent = activeNote.isEncrypted && passphrase 
-      ? encryptText(rawText, passphrase) 
-      : rawText;
+      ? encryptText(fullRawText, passphrase) 
+      : fullRawText;
 
     const finalTags = updatedTags !== undefined ? updatedTags : (activeNote.tags || []);
 
     const updatedNoteData = {
       ...activeNote,
-      title,
+      title: titleForDb,
       content: finalContent,
       tags: finalTags,
       updatedAt: new Date().toISOString().split("T")[0],
@@ -227,19 +245,21 @@ function NoteApp() {
     const cleanTag = tagToAdd.trim().replace(/^#/, "");
     if (!cleanTag) return;
 
+    const { title, body } = getNoteTitleAndBody(activeNote);
     const currentTags = activeNote.tags || [];
     if (!currentTags.includes(cleanTag)) {
       const newTags = [...currentTags, cleanTag];
-      handleUpdateContent(getDisplayedContent(activeNote), newTags);
+      handleSaveNoteData(title, body, newTags);
     }
     setTagInput("");
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     if (!activeNote) return;
+    const { title, body } = getNoteTitleAndBody(activeNote);
     const currentTags = activeNote.tags || [];
     const newTags = currentTags.filter((t) => t !== tagToRemove);
-    handleUpdateContent(getDisplayedContent(activeNote), newTags);
+    handleSaveNoteData(title, body, newTags);
   };
 
   // 🛡️ 智慧 URL 辨識建議 Tag
@@ -288,12 +308,13 @@ function NoteApp() {
       return;
     }
 
-    const currentText = getDisplayedContent(activeNote);
+    const { title, body } = getNoteTitleAndBody(activeNote);
+    const fullText = `${title}\n${body}`;
     const nextEncryptedState = !activeNote.isEncrypted;
 
     const newContent = nextEncryptedState
-      ? encryptText(currentText, passphrase)
-      : currentText;
+      ? encryptText(fullText, passphrase)
+      : fullText;
 
     const updatedNoteData = {
       ...activeNote,
@@ -355,7 +376,8 @@ function NoteApp() {
     if (!isChatOpen) setIsChatOpen(true);
 
     try {
-      const currentNoteText = activeNote ? getDisplayedContent(activeNote) : "";
+      const { title, body } = getNoteTitleAndBody(activeNote);
+      const currentNoteText = `${title}\n${body}`;
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -398,17 +420,17 @@ function NoteApp() {
     const textarea = textareaRef.current;
     const start = lastSelectionRef.current.start;
     const end = lastSelectionRef.current.end;
-    const currentContent = getDisplayedContent(activeNote);
+    const { title, body } = getNoteTitleAndBody(activeNote);
 
-    const selectedText = currentContent.substring(start, end) || defaultText;
+    const selectedText = body.substring(start, end) || defaultText;
     const replacement = `${prefix}${selectedText}${suffix}`;
 
-    const newContent = 
-      currentContent.substring(0, start) + 
+    const newBody = 
+      body.substring(0, start) + 
       replacement + 
-      currentContent.substring(end);
+      body.substring(end);
 
-    handleUpdateContent(newContent);
+    handleSaveNoteData(title, newBody);
 
     const newCursorPos = start + replacement.length;
 
@@ -533,22 +555,12 @@ function NoteApp() {
         const imageUrl = data.data.link;
         const finalImageTag = `\n![${file.name}](${imageUrl})\n`;
 
-        setNotes((prevNotes) => {
-          const currentNote = prevNotes.find((n) => n.id === activeNoteId);
-          if (!currentNote) return prevNotes;
+        const { title, body } = getNoteTitleAndBody(activeNote);
+        const newBody = body.includes(loadingPlaceholder.trim())
+          ? body.replace(loadingPlaceholder.trim(), finalImageTag.trim())
+          : `${body}\n${finalImageTag}`;
 
-          const currentContent = currentNote.isEncrypted && passphrase 
-            ? decryptText(currentNote.content, passphrase)
-            : currentNote.content;
-
-          const newRawText = currentContent.includes(loadingPlaceholder.trim())
-            ? currentContent.replace(loadingPlaceholder.trim(), finalImageTag.trim())
-            : `${currentContent}\n${finalImageTag}`;
-
-          handleUpdateContent(newRawText);
-
-          return prevNotes;
-        });
+        handleSaveNoteData(title, newBody);
       } else {
         alert("圖片上傳失敗，請稍後再試！");
       }
@@ -565,7 +577,8 @@ function NoteApp() {
     new Set(notes.flatMap((n) => n.tags || []))
   );
 
-  const detectedDomainTag = activeNote ? detectUrlTag(getDisplayedContent(activeNote)) : null;
+  const activeNoteData = getNoteTitleAndBody(activeNote);
+  const detectedDomainTag = activeNote ? detectUrlTag(`${activeNoteData.title}\n${activeNoteData.body}`) : null;
 
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
@@ -690,21 +703,18 @@ function NoteApp() {
         <div className="flex-1 overflow-y-auto divide-y divide-neutral-800/50">
           {notes
             .filter((n) => {
-              // 1. Tag 標籤過濾
               if (selectedTagFilter !== null && (!n.tags || !n.tags.includes(selectedTagFilter))) {
                 return false;
               }
-
-              // 2. 搜尋關鍵字比對 (標題 + 解密內文 + Tag)
               if (!searchTerm.trim()) return true;
 
               const term = searchTerm.toLowerCase();
               const titleMatch = n.title.toLowerCase().includes(term);
               const tagMatch = n.tags?.some((t) => t.toLowerCase().includes(term));
 
-              // 取得解密後的內文 (若是加密筆記且已輸入 Passphrase 則自動解密後比對)
-              const displayedContent = getDisplayedContent(n).toLowerCase();
-              const contentMatch = displayedContent.includes(term);
+              const noteData = getNoteTitleAndBody(n);
+              const fullContent = `${noteData.title}\n${noteData.body}`.toLowerCase();
+              const contentMatch = fullContent.includes(term);
 
               return titleMatch || tagMatch || contentMatch;
             })
@@ -768,7 +778,7 @@ function NoteApp() {
                 </button>
                 <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
                 <span className="font-medium text-sm text-neutral-300 truncate max-w-[100px] sm:max-w-[180px]">
-                  {activeNote.title || "無標題筆記"}
+                  {activeNoteData.title || "無標題筆記"}
                 </span>
               </div>
               
@@ -873,21 +883,11 @@ function NoteApp() {
               </div>
             </header>
 
-            {/* 常駐顯示的安全提醒 */}
-            <div className="mx-4 mt-3 p-2.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2 shrink-0">
-              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-[11px] leading-tight">
-                <b>安全提醒：</b>第 1 行為筆記標題（<b>不加密</b>）。請從第 2 行開始輸入機密資料。
-              </span>
-            </div>
-
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
               
-              {/* 🏷️ 動態折疊 Tag 標籤控制列 (展開時顯示，平時收合節省版面) */}
+              {/* 🏷️ 動態折疊 Tag 標籤控制列 */}
               {isTagSectionOpen && (
                 <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                  
-                  {/* 已綁定的 Tags & 新增輸入框 */}
                   <div className="flex items-center gap-1.5 flex-wrap text-xs">
                     <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     
@@ -924,7 +924,6 @@ function NoteApp() {
                     </form>
                   </div>
 
-                  {/* 常用類型膠囊 & 智慧 URL 建議 */}
                   <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1 border-t border-neutral-800/60 text-[11px]">
                     <span className="text-neutral-500 text-[10px] shrink-0">常用類型:</span>
                     
@@ -960,7 +959,6 @@ function NoteApp() {
                       💳 #CreditCard
                     </button>
 
-                    {/* 💡 智慧 URL 自動辨識建議按鈕 */}
                     {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
                       <button
                         type="button"
@@ -972,14 +970,22 @@ function NoteApp() {
                       </button>
                     )}
                   </div>
-
                 </div>
               )}
 
-              {/* 格式工具列 (整合 Tag 折疊按鈕 + AI ON/OFF) */}
+              {/* 格式工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 
-              
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
+                  disabled={activeNote.isEncrypted && !passphrase}
+                  className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
+                  title="插入結構化帳號密碼範本"
+                >
+                  <Key className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Sercet</span>
+                </button>
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
@@ -1081,19 +1087,7 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
-                  {/* 🔑 帳密範本一鍵插入按鈕 */}
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
-                  title="插入結構化帳號密碼範本"
-                >
-                  <Key className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sercet</span>
-                </button>
-
-                {/* 🏷️ Tag 標籤動態折疊按鈕 (放在 AI ON/OFF 前面) */}
+                {/* 🏷️ Tag 標籤動態折疊按鈕 */}
                 <button
                   type="button"
                   onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
@@ -1113,7 +1107,7 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
-                {/* 🛡️ AI 保密/啟用安全開關 (最右側) */}
+                {/* 🛡️ AI 保密/啟用安全開關 */}
                 <button
                   type="button"
                   onClick={() => setIsAiEnabled(!isAiEnabled)}
@@ -1129,28 +1123,60 @@ function NoteApp() {
                 </button>
               </div>
 
-              {/* 編輯器 / 預覽器 切換顯示區域 */}
-              <div className="flex-1 overflow-y-auto">
+              {/* 編輯器 / 預覽器 切換顯示區域 (包含可滾動的橘框標題與內文框) */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {viewMode === 'edit' ? (
-                  <textarea
-                    ref={textareaRef}
-                    value={getDisplayedContent(activeNote)}
-                    onChange={(e) => handleUpdateContent(e.target.value)}
-                    onBlur={(e) => handleUpdateContent(e.target.value)}
-                    onClick={updateSelection}
-                    onKeyUp={updateSelection}
-                    onSelect={updateSelection}
-                    disabled={activeNote.isEncrypted && !passphrase}
-                    placeholder="第 1 行：筆記標題（不加密）&#10;第 2 行起：機密內容..."
-                    className="w-full h-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 pb-30"
-                  />
+                  <div className="flex flex-col gap-3 min-h-full pb-30">
+                    
+                    {/* 🟠 1. 獨立的橘框標題列 (鍵盤按 Tab 即可切換到下方內文框) */}
+                    <div className="relative shrink-0">
+                      <input
+                        ref={titleInputRef}
+                        type="text"
+                        value={activeNoteData.title}
+                        onChange={(e) => handleSaveNoteData(e.target.value, activeNoteData.body)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Tab' && !e.shiftKey) {
+                            e.preventDefault();
+                            textareaRef.current?.focus();
+                          }
+                        }}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        placeholder="⚠️ 筆記標題（不加密，僅供搜尋，有字時提示自動消失）..."
+                        className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
+                      />
+                    </div>
+
+                    {/* 📝 2. 下方機密內文框 */}
+                    <textarea
+                      ref={textareaRef}
+                      value={activeNoteData.body}
+                      onChange={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
+                      onBlur={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Tab' && e.shiftKey) {
+                          e.preventDefault();
+                          titleInputRef.current?.focus();
+                        }
+                      }}
+                      onClick={updateSelection}
+                      onKeyUp={updateSelection}
+                      onSelect={updateSelection}
+                      disabled={activeNote.isEncrypted && !passphrase}
+                      placeholder="從這裡開始輸入機密內容（會隨設定加密，保護隱私）..."
+                      className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
+                    />
+                  </div>
                 ) : (
                   <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
+                    <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
+                      {activeNoteData.title || "無標題筆記"}
+                    </h1>
+
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
-                        // 🐢 預覽模式一鍵複製卡片 (帶烏龜 Icon)
                         p: ({ node, children, ...props }) => {
                           const rawText = Array.isArray(children) ? children.join('') : String(children || '');
                           const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
@@ -1186,10 +1212,10 @@ function NoteApp() {
                                   {copiedKey === keyId ? (
                                     <>
                                       <Check className="w-3 h-3 text-white" />
-                                      <span>COPIED (30s)</span>
+                                      <span>已複製 (30s)</span>
                                     </>
                                   ) : (
-                                    <span>COPY</span>
+                                    <span>複製</span>
                                   )}
                                 </button>
                               </p>
@@ -1209,7 +1235,7 @@ function NoteApp() {
                         )
                       }}
                     >
-                      {getDisplayedContent(activeNote)}
+                      {activeNoteData.body}
                     </ReactMarkdown>
                   </div>
                 )}
