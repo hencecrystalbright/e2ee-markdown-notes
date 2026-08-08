@@ -163,9 +163,9 @@ export default function LoginPage() {
             setLockCountdown(LOCK_TIME_SECONDS);
             setErrorMsg("⚠️ 登入失敗已達 5 次，已強制鎖定！請等 18 分鐘後再行登入。Locked for 18 mins");
           } else if (newAttempts === 4) {
-            setErrorMsg("⚠️ 錯誤Error！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
+            setErrorMsg("⚠️ 錯誤Error！如果再錯誤 1 次，需要等 18 分鐘再行登入。will lock if 1 errormore");
           } else {
-            setErrorMsg(`⚠️錯誤Error，請重新確認 (剩餘次數: ${5 - newAttempts} 次)`);
+            setErrorMsg(`⚠️錯誤Error，請重新確認 (剩餘次數: ${5 - newAttempts} more times)`);
           }
         } else {
           setFailedAttempts(0);
