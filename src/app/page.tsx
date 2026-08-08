@@ -262,46 +262,45 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-// 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag (動態比對版)
+// 🛡️ 通用網址感測 Tag (不用硬寫清單，支援任何 Domain)
   const detectUrlTag = (content: string, currentTags: string[] = []) => {
     if (!content) return null;
 
-    // 1. 優先匹配標準網址
+    // 1. 匹配標準 URL (http:// 或 https://)
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const urlMatches = content.match(urlRegex);
-    if (urlMatches) {
-      const lastUrl = urlMatches[urlMatches.length - 1]; // 取最新輸入的 URL
+    const matches = content.match(urlRegex);
+
+    if (matches && matches.length > 0) {
+      const lastUrlStr = matches[matches.length - 1]; // 取最後輸入的 URL
       try {
-        const url = new URL(lastUrl);
-        const hostname = url.hostname.toLowerCase();
+        const url = new URL(lastUrlStr);
+        let host = url.hostname.toLowerCase().replace(/^www\./, '');
+        
+        // 抓取主 Domain (例如 finestar.com => finestar)
+        const parts = host.split('.');
+        const mainDomain = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
 
-        if (hostname.includes('mail.google.com')) return 'Gmail';
-        if (hostname.includes('github.com')) return 'Github';
-        if (hostname.includes('yahoo.com')) return 'Yahoo';
-        if (hostname.includes('google.com')) return 'Google';
-        if (hostname.includes('aws.amazon.com')) return 'AWS';
-        if (hostname.includes('facebook.com')) return 'Facebook';
-
-        const hostParts = hostname.replace('www.', '').split('.');
-        if (hostParts.length >= 2) {
-          const domainName = hostParts[0];
-          return domainName.charAt(0).toUpperCase() + domainName.slice(1);
+        if (mainDomain) {
+          const tag = mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
+          if (!currentTags.includes(tag)) return tag;
         }
       } catch (e) {
         // ignore
       }
     }
 
-    // 2. 取最後一行輸入的文字進行單行精準匹配
-    const lines = content.split('\n').map(l => l.trim().toLowerCase()).filter(Boolean);
-    const lastLine = lines[lines.length - 1] || "";
+    // 2. 匹配沒有 http 的網址格式 (例如 finestar.com 或 github.com)
+    const domainRegex = /([a-zA-Z0-9-]+\.(?:com|org|net|io|co|cc|tw|dev|app|xyz))[^\s]*/gi;
+    const domainMatches = content.match(domainRegex);
 
-    if (lastLine.includes('github') && !currentTags.includes('Github')) return 'Github';
-    if (lastLine.includes('yahoo') && !currentTags.includes('Yahoo')) return 'Yahoo';
-    if ((lastLine.includes('gmail') || lastLine.includes('mail.google.com')) && !currentTags.includes('Gmail')) return 'Gmail';
-    if (lastLine.includes('google') && !currentTags.includes('Google')) return 'Google';
-    if (lastLine.includes('aws') && !currentTags.includes('AWS')) return 'AWS';
-    if (lastLine.includes('facebook') && !currentTags.includes('Facebook')) return 'Facebook';
+    if (domainMatches && domainMatches.length > 0) {
+      const lastDomainStr = domainMatches[domainMatches.length - 1];
+      const mainName = lastDomainStr.split('.')[0].replace(/[^a-zA-Z0-9-]/g, '');
+      if (mainName) {
+        const tag = mainName.charAt(0).toUpperCase() + mainName.slice(1);
+        if (!currentTags.includes(tag)) return tag;
+      }
+    }
 
     return null;
   };
