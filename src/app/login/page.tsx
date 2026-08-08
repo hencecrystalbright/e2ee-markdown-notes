@@ -284,7 +284,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 required
                 disabled={lockCountdown > 0}
-                placeholder={isRegister ? "密碼長度至少1個字母 6 個字At least 1 letter and6 characters..." : "輸入您的密碼Please enter your password"}
+                placeholder={isRegister ? "至少1個字母 6 個數字At least 1 letter and 6 numbers..." : "輸入您的密碼Please enter your password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
