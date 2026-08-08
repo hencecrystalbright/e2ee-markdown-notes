@@ -895,7 +895,7 @@ function NoteApp() {
                   </div>
 
                   <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1 border-t border-neutral-800/60 text-[11px]">
-                    <span className="text-neutral-500 text-[10px] shrink-0">常用類型:</span>
+                    <span className="text-neutral-500 text-[10px] shrink-0"></span>
 
                     <button
                       type="button"
@@ -921,15 +921,7 @@ function NoteApp() {
                       🛡️ #SSH_Key
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("CreditCard")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0"
-                    >
-                      💳 #CreditCard
-                    </button>
-
-
+                    
                   </div>
                 </div>
               )}
