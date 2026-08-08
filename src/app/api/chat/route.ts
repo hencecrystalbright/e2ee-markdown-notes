@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const newNote = await prisma.note.create({
       data: {
         userId: session.user.id,
-        title: body.title !== undefined ? body.title : "",
+        title: title !== undefined ? title : "",
         content: content || "",
         isEncrypted: isEncrypted || false,
         tags: tags || [], // 👈 支援儲存 tags
