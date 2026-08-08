@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { User, Lock, ArrowRight, ShieldCheck, CheckCircle2, XCircle, Loader2, Eye, EyeOff } from "lucide-react";
+import { User, Lock, ArrowRight, ShieldCheck, CheckCircle2, XCircle, Loader2, Eye, EyeOff, ShieldAlert } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,6 +20,57 @@ export default function LoginPage() {
   const [checkingAccount, setCheckingAccount] = useState(false);
   const [isAccountAvailable, setIsAccountAvailable] = useState<boolean | null>(null);
 
+  // 🛡️ 防爆破 18 分鐘控制 State (試錯次數與倒數秒數)
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockCountdown, setLockCountdown] = useState(0);
+
+  // 18 分鐘 = 1080 秒
+  const LOCK_TIME_SECONDS = 18 * 60;
+
+  // 1. 初始化讀取 LocalStorage：若先前被鎖定且時間未過，繼續鎖定倒數
+  useEffect(() => {
+    const savedLockUntil = localStorage.getItem("login_lock_until");
+    if (savedLockUntil) {
+      const lockUntil = parseInt(savedLockUntil, 10);
+      const now = Date.now();
+      if (lockUntil > now) {
+        const remainingSeconds = Math.ceil((lockUntil - now) / 1000);
+        setLockCountdown(remainingSeconds);
+        setFailedAttempts(5);
+      } else {
+        localStorage.removeItem("login_lock_until");
+      }
+    }
+  }, []);
+
+  // 2. 鎖定秒數即時倒數 Timer
+  useEffect(() => {
+    if (lockCountdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          localStorage.removeItem("login_lock_until");
+          setFailedAttempts(0);
+          setErrorMsg("");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockCountdown]);
+
+  // 格式化秒數為 mm:ss
+  const formatCountdown = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  // 帳號重複檢查
   useEffect(() => {
     if (!isRegister || !account.trim()) {
       setIsAccountAvailable(null);
@@ -46,6 +97,9 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMsg("");
 
+    // 鎖定狀態下拒絕發送
+    if (lockCountdown > 0) return;
+
     if (isRegister && isAccountAvailable === false) {
       setErrorMsg("此帳號已被註冊，請選用其他帳號名稱");
       return;
@@ -58,7 +112,7 @@ export default function LoginPage() {
         const res = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ account, password }), // 👈 修正點：統一傳送 account 變數名稱！
+          body: JSON.stringify({ account, password }),
         });
 
         const data = await res.json();
@@ -79,6 +133,8 @@ export default function LoginPage() {
           setErrorMsg("註冊成功，但自動登入失敗，請手動登入");
           setIsRegister(false);
         } else {
+          setFailedAttempts(0);
+          localStorage.removeItem("login_lock_until");
           router.push("/");
           router.refresh();
         }
@@ -96,8 +152,25 @@ export default function LoginPage() {
         });
 
         if (result?.error) {
-          setErrorMsg("帳號或密碼錯誤，請重新確認");
+          const newAttempts = failedAttempts + 1;
+          setFailedAttempts(newAttempts);
+
+          if (newAttempts >= 5) {
+            // 第 5 次錯誤：鎖定 18 分鐘
+            const lockUntil = Date.now() + LOCK_TIME_SECONDS * 1000;
+            localStorage.setItem("login_lock_until", lockUntil.toString());
+            setLockCountdown(LOCK_TIME_SECONDS);
+            setErrorMsg("⚠️ 登入失敗已達 5 次，系統已強制鎖定！請等 18 分鐘後再行登入。");
+          } else if (newAttempts === 4) {
+            // 第 4 次錯誤：跳出特別警告
+            setErrorMsg("⚠️ 帳號或密碼錯誤！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
+          } else {
+            setErrorMsg(`帳號或密碼錯誤，請重新確認 (剩餘嘗試次數: ${5 - newAttempts} 次)`);
+          }
         } else {
+          // 登入成功：清除試錯紀錄
+          setFailedAttempts(0);
+          localStorage.removeItem("login_lock_until");
           router.push("/");
           router.refresh();
         }
@@ -121,7 +194,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-neutral-100 tracking-tight">TurtleNote</h1>
           <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            端到端加密安全Personal Encrypted Notes
+            端到端加密安全 Personal Encrypted Notes
             若忘記密碼將無法找回! 
             If you forget password, you will not be able to retrieve it!
           </p>
@@ -153,8 +226,9 @@ export default function LoginPage() {
         </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
-            {errorMsg}
+          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -186,10 +260,11 @@ export default function LoginPage() {
               <input
                 type="text"
                 required
+                disabled={lockCountdown > 0}
                 placeholder="請輸入您的帳號名稱"
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
-                className={`w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border rounded-xl focus:outline-none transition-colors ${
+                className={`w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border rounded-xl focus:outline-none transition-colors disabled:opacity-50 ${
                   isRegister && isAccountAvailable === false 
                     ? "border-red-500/80 focus:border-red-500 text-neutral-200" 
                     : isRegister && isAccountAvailable === true
@@ -203,19 +278,19 @@ export default function LoginPage() {
 
           {/* 密碼 輸入欄 + 切換顯隱按鈕 */}
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼(Password)</label>
+            <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼 (Password)</label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"} // 👈 動態切換 text / password
+                type={showPassword ? "text" : "password"}
                 required
+                disabled={lockCountdown > 0}
                 placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼 at least 6 characters..."}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors"
+                className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
               />
               <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
               
-              {/* 眼睛切換按鈕 */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -227,13 +302,22 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* 提交／鎖定倒數按鈕 */}
           <button
             type="submit"
-            disabled={loading || (isRegister && isAccountAvailable === false)}
-            className="w-full py-3 px-4 mt-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={loading || (isRegister && isAccountAvailable === false) || lockCountdown > 0}
+            className={`w-full py-3 px-4 mt-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+              lockCountdown > 0
+                ? "bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white shadow-lg shadow-emerald-950/50 disabled:opacity-50"
+            }`}
           >
             {loading ? (
-              <span>處理中...</span>
+              <span className="flex items-center gap-1.5">
+                <Loader2 className="w-4 h-4 animate-spin" /> 處理中...
+              </span>
+            ) : lockCountdown > 0 ? (
+              <span>🔒 系統已鎖定 (請等待 {formatCountdown(lockCountdown)})</span>
             ) : (
               <>
                 <span>{isRegister ? "註冊並登入" : "立即登入"}</span>
