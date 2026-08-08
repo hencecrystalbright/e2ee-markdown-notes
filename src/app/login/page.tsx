@@ -160,12 +160,12 @@ export default function LoginPage() {
             const lockUntil = Date.now() + LOCK_TIME_SECONDS * 1000;
             localStorage.setItem("login_lock_until", lockUntil.toString());
             setLockCountdown(LOCK_TIME_SECONDS);
-            setErrorMsg("⚠️ 登入失敗已達 5 次，系統已強制鎖定！請等 18 分鐘後再行登入。");
+            setErrorMsg("⚠️ 登入失敗已達 5 次，已強制鎖定！請等 18 分鐘後再行登入。locked for 18 mins");
           } else if (newAttempts === 4) {
             // 第 4 次錯誤：跳出特別警告
-            setErrorMsg("⚠️ 帳號或密碼錯誤！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
+            setErrorMsg("⚠️ 錯誤！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
           } else {
-            setErrorMsg(`帳號或密碼錯誤，請重新確認 (剩餘嘗試次數: ${5 - newAttempts} 次)`);
+            setErrorMsg(`⚠️錯誤，請重新確認 (剩餘嘗試次數: ${5 - newAttempts} 次)`);
           }
         } else {
           // 登入成功：清除試錯紀錄
@@ -284,7 +284,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 required
                 disabled={lockCountdown > 0}
-                placeholder={isRegister ? "密碼長度至少 6 個字" : "輸入您的密碼 at least 6 characters..."}
+                placeholder={isRegister ? "密碼長度至少1個字母 6 個字At least 1 letter and6 characters..." : "輸入您的密碼Please enter your password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
@@ -314,10 +314,10 @@ export default function LoginPage() {
           >
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <Loader2 className="w-4 h-4 animate-spin" /> 處理中...
+                <Loader2 className="w-4 h-4 animate-spin" /> working...
               </span>
             ) : lockCountdown > 0 ? (
-              <span>🔒 系統已鎖定 (請等待 {formatCountdown(lockCountdown)})</span>
+              <span>🔒🔒🔒已鎖定 (請等待Please wait for {formatCountdown(lockCountdown)})</span>
             ) : (
               <>
                 <span>{isRegister ? "註冊並登入" : "立即登入"}</span>
