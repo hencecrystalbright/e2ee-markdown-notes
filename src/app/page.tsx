@@ -151,17 +151,15 @@ function NoteApp() {
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
-  // 拆分標題與內文 Helper (未設定時預設回傳空字串 "")
+  // 拆分標題與內文 Helper
   const getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
       const parts = note.content.split("\n");
-      // 確保如果第一行是空字串，不要強迫回傳 "無標題筆記"
-      const title = parts[0]?.replace(/^#*\s*/, "") || "";
+      const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
       const body = parts.slice(1).join("\n");
       return { title, body };
     }
-    // ...
 
     if (!passphrase) {
       return { title: note.title || "", body: "🔒 內容已加密，請在左側輸入金鑰以解密檢視。" };
@@ -174,7 +172,7 @@ function NoteApp() {
     return { title, body };
   };
 
-  // 建立新筆記 (標題預設為空字串 "")
+  // 建立新筆記
   const handleCreateNote = async () => {
     const newNoteData = {
       title: "",
@@ -205,7 +203,7 @@ function NoteApp() {
     }
   };
 
-  // 組合標題與內文並更新後端 (未填寫標題時儲存為 "")
+  // 組合標題與內文並更新後端
   const handleSaveNoteData = async (newTitle: string, newBody: string, updatedTags?: string[]) => {
     if (!activeNote) return;
 
@@ -264,30 +262,44 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-  // 🛡️ 智慧 URL 辨識建議 Tag
+  // 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag (強力修復版)
   const detectUrlTag = (content: string) => {
+    if (!content) return null;
+
+    // 1. 先找完整的 HTTP/HTTPS 網址
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const match = content.match(urlRegex);
-    if (!match) return null;
+    if (match) {
+      try {
+        const url = new URL(match[0]);
+        const hostname = url.hostname.toLowerCase();
 
-    try {
-      const url = new URL(match[0]);
-      const hostname = url.hostname.toLowerCase();
+        if (hostname.includes('mail.google.com')) return 'Gmail';
+        if (hostname.includes('google.com')) return 'Google';
+        if (hostname.includes('github.com')) return 'Github';
+        if (hostname.includes('aws.amazon.com')) return 'AWS';
+        if (hostname.includes('facebook.com')) return 'Facebook';
+        if (hostname.includes('yahoo.com')) return 'Yahoo';
 
-      if (hostname.includes('mail.google.com')) return 'Gmail';
-      if (hostname.includes('google.com')) return 'Google';
-      if (hostname.includes('github.com')) return 'Github';
-      if (hostname.includes('aws.amazon.com')) return 'AWS';
-      if (hostname.includes('facebook.com')) return 'Facebook';
-
-      const hostParts = hostname.replace('www.', '').split('.');
-      if (hostParts.length >= 2) {
-        const domainName = hostParts[0];
-        return domainName.charAt(0).toUpperCase() + domainName.slice(1);
+        const hostParts = hostname.replace('www.', '').split('.');
+        if (hostParts.length >= 2) {
+          const domainName = hostParts[0];
+          return domainName.charAt(0).toUpperCase() + domainName.slice(1);
+        }
+      } catch (e) {
+        // ignore
       }
-    } catch (e) {
-      return null;
     }
+
+    // 2. 若沒有標準網址，支援 URL: yahoo / URL: github 這類常用寫法
+    const textLower = content.toLowerCase();
+    if (textLower.includes('mail.google.com') || textLower.includes('gmail')) return 'Gmail';
+    if (textLower.includes('yahoo')) return 'Yahoo';
+    if (textLower.includes('github')) return 'Github';
+    if (textLower.includes('google')) return 'Google';
+    if (textLower.includes('facebook')) return 'Facebook';
+    if (textLower.includes('aws')) return 'AWS';
+
     return null;
   };
 
@@ -600,13 +612,10 @@ function NoteApp() {
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
+          
+          {/* 側邊欄 Header：登出鈕移至最左邊 (TurtleNote 左側) */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
-              <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
-              <span>TurtleNote</span>
-            </div>
-            
-            <div className="flex items-center gap-1">
               <button 
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
@@ -615,6 +624,11 @@ function NoteApp() {
                 <LogOut className="w-4 h-4" />
               </button>
 
+              <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
+              <span>TurtleNote</span>
+            </div>
+            
+            <div className="flex items-center gap-1">
               <button 
                 onClick={handleCreateNote}
                 className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
@@ -887,7 +901,7 @@ function NoteApp() {
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
               
-              {/* 🏷️ 動態折疊 Tag 標籤控制列 */}
+              {/* 🏷️ 動態折疊 Tag 標籤控制列 (含智慧網址偵測膠囊) */}
               {isTagSectionOpen && (
                 <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="flex items-center gap-1.5 flex-wrap text-xs">
@@ -961,6 +975,7 @@ function NoteApp() {
                       💳 #CreditCard
                     </button>
 
+                    {/* 💡 智慧網址/關鍵字自動辨識建議按鈕 */}
                     {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
                       <button
                         type="button"
@@ -978,10 +993,6 @@ function NoteApp() {
               {/* 格式工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
                 
-                
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-
                 <button
                   type="button"
                   onClick={() => insertFormatting("**", "**", "粗體文字")}
@@ -1053,7 +1064,7 @@ function NoteApp() {
                   onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', '向左對齊內容')}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="向左對齊"
+                  title="向向左對齊"
                 >
                   <AlignLeft className="w-4 h-4" />
                 </button>
@@ -1080,21 +1091,26 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
-                {/* 🏷️ Tag 標籤動態折疊按鈕 */}
+                {/* 🏷️ Tag 標籤動態折疊按鈕 (若偵測到建議 Tag 則閃爍提示) */}
                 <button
                   type="button"
                   onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
                   className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${
                     isTagSectionOpen
                       ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
-                      : (activeNote.tags && activeNote.tags.length > 0)
-                        ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
-                        : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                      : (detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag))
+                        ? "bg-indigo-950 text-indigo-300 border border-indigo-500 animate-pulse"
+                        : (activeNote.tags && activeNote.tags.length > 0)
+                          ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
+                          : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
                   }`}
                   title={isTagSectionOpen ? "點擊收合 Tag 面板" : "點擊展開 Tag 面板"}
                 >
                   <TagIcon className="w-3.5 h-3.5" />
-                  <span>Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}</span>
+                  <span>
+                    Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}
+                    {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) ? ' 💡' : ''}
+                  </span>
                   {isTagSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
                 </button>
 
@@ -1132,7 +1148,7 @@ function NoteApp() {
                 {viewMode === 'edit' ? (
                   <div className="flex flex-col gap-3 min-h-full pb-30">
                     
-                    {/* 🟠 1. 獨立橘框標題列：未來若要更改提示，只需要更改這一行的 placeholder 屬性即可！ */}
+                    {/* 🟠 1. 獨立橘框標題列 */}
                     <div className="relative shrink-0">
                       <input
                         ref={titleInputRef}
