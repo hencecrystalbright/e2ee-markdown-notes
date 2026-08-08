@@ -886,7 +886,7 @@ function NoteApp() {
                     >
                       <input
                         type="text"
-                        placeholder="+ 自訂 Tag..."
+                        placeholder="+  Tag..."
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
