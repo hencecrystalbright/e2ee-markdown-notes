@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signOut } from "next-auth/react";
-import { 
-  Plus, 
-  FileText, 
-  Lock, 
-  Unlock, 
-  Trash2, 
-  Search, 
+import {
+  Plus,
+  FileText,
+  Lock,
+  Unlock,
+  Trash2,
+  Search,
   ShieldAlert,
   KeyRound,
   Eye,
@@ -210,8 +210,8 @@ function NoteApp() {
     const fullRawText = `${newTitle}\n${newBody}`;
     const titleForDb = newTitle.trim();
 
-    const finalContent = activeNote.isEncrypted && passphrase 
-      ? encryptText(fullRawText, passphrase) 
+    const finalContent = activeNote.isEncrypted && passphrase
+      ? encryptText(fullRawText, passphrase)
       : fullRawText;
 
     const finalTags = updatedTags !== undefined ? updatedTags : (activeNote.tags || []);
@@ -343,7 +343,7 @@ function NoteApp() {
 
     const userMsg: ChatMessage = { role: 'user', content: messageToSend };
     const newHistory = [...chatMessages, userMsg];
-    
+
     setChatMessages(newHistory);
     if (!overridePrompt) setInputMessage("");
     setIsAiThinking(true);
@@ -399,9 +399,9 @@ function NoteApp() {
     const selectedText = body.substring(start, end) || defaultText;
     const replacement = `${prefix}${selectedText}${suffix}`;
 
-    const newBody = 
-      body.substring(0, start) + 
-      replacement + 
+    const newBody =
+      body.substring(0, start) +
+      replacement +
       body.substring(end);
 
     handleSaveNoteData(title, newBody);
@@ -552,13 +552,13 @@ function NoteApp() {
   );
 
   const activeNoteData = getNoteTitleAndBody(activeNote);
-  
+
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
-      
+
       {/* 手機版遮罩 Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -571,11 +571,11 @@ function NoteApp() {
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
-          
+
           {/* 側邊欄 Header：登出鈕位於最左邊 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
-              <button 
+              <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
                 title="登出帳號"
@@ -586,17 +586,17 @@ function NoteApp() {
               <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
               <span>TurtleNote</span>
             </div>
-            
+
             <div className="flex items-center gap-1">
-              <button 
+              <button
                 onClick={handleCreateNote}
                 className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                 title="新增筆記"
               >
                 <Plus className="w-5 h-5" />
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsSidebarOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 md:hidden"
               >
@@ -650,11 +650,10 @@ function NoteApp() {
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
               <button
                 onClick={() => setSelectedTagFilter(null)}
-                className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors shrink-0 ${
-                  selectedTagFilter === null
-                    ? "bg-emerald-600 text-white"
-                    : "bg-neutral-950 text-neutral-400 hover:text-neutral-200"
-                }`}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors shrink-0 ${selectedTagFilter === null
+                  ? "bg-emerald-600 text-white"
+                  : "bg-neutral-950 text-neutral-400 hover:text-neutral-200"
+                  }`}
               >
                 全部
               </button>
@@ -662,11 +661,10 @@ function NoteApp() {
                 <button
                   key={tag}
                   onClick={() => setSelectedTagFilter(selectedTagFilter === tag ? null : tag)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors shrink-0 ${
-                    selectedTagFilter === tag
-                      ? "bg-emerald-600 text-white"
-                      : "bg-neutral-950 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
-                  }`}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors shrink-0 ${selectedTagFilter === tag
+                    ? "bg-emerald-600 text-white"
+                    : "bg-neutral-950 text-neutral-400 hover:text-neutral-200 border border-neutral-800"
+                    }`}
                 >
                   #{tag}
                 </button>
@@ -700,11 +698,10 @@ function NoteApp() {
                   setActiveNoteId(note.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`p-3.5 cursor-pointer transition-colors ${
-                  activeNoteId === note.id
-                    ? "bg-neutral-800/80 text-white"
-                    : "hover:bg-neutral-800/40 text-neutral-400"
-                }`}
+                className={`p-3.5 cursor-pointer transition-colors ${activeNoteId === note.id
+                  ? "bg-neutral-800/80 text-white"
+                  : "hover:bg-neutral-800/40 text-neutral-400"
+                  }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm truncate text-neutral-200">
@@ -756,11 +753,10 @@ function NoteApp() {
                   {activeNoteData.title || "Untitled Note"}
                 </span>
               </div>
-              
+
               {/* 🤖 頂部 AI 快捷圖示選單 */}
-              <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${
-                !isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
-              }`}>
+              <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${!isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
+                }`}>
                 <button
                   onClick={() => handleSendAiMessage("請幫我提煉這篇筆記的核心重點與摘要。")}
                   disabled={isAiThinking || !isAiEnabled}
@@ -829,11 +825,10 @@ function NoteApp() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={toggleEncryption}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${
-                    activeNote.isEncrypted
-                      ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
-                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                  }`}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors shrink-0 ${activeNote.isEncrypted
+                    ? "bg-emerald-950/80 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50"
+                    : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
+                    }`}
                 >
                   {activeNote.isEncrypted ? (
                     <>
@@ -859,13 +854,13 @@ function NoteApp() {
             </header>
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-              
+
               {/* 🏷️ 動態折疊 Tag 標籤控制列 */}
               {isTagSectionOpen && (
                 <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="flex items-center gap-1.5 flex-wrap text-xs">
                     <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    
+
                     {activeNote.tags?.map((t) => (
                       <span
                         key={t}
@@ -901,7 +896,7 @@ function NoteApp() {
 
                   <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1 border-t border-neutral-800/60 text-[11px]">
                     <span className="text-neutral-500 text-[10px] shrink-0">常用類型:</span>
-                    
+
                     <button
                       type="button"
                       onClick={() => handleAddTag("Password")}
@@ -934,14 +929,14 @@ function NoteApp() {
                       💳 #CreditCard
                     </button>
 
-                    
+
                   </div>
                 </div>
               )}
 
               {/* 格式工具列 */}
               <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
-                
+
                 <button
                   type="button"
                   onClick={() => insertFormatting("**", "**", "粗體文字")}
@@ -1044,21 +1039,17 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
-                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${
-                    isTagSectionOpen
-                      ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
-                      : (detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag))
-                        ? "bg-indigo-950 text-indigo-300 border border-indigo-500 animate-pulse"
-                        : (activeNote.tags && activeNote.tags.length > 0)
-                          ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
-                          : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                  }`}
+                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isTagSectionOpen
+                    ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
+                    : (activeNote.tags && activeNote.tags.length > 0)
+                      ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
+                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    }`}
                   title={isTagSectionOpen ? "點擊收合 Tag 面板" : "點擊展開 Tag 面板"}
                 >
                   <TagIcon className="w-3.5 h-3.5" />
                   <span>
                     Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}
-                    {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) ? ' 💡' : ''}
                   </span>
                   {isTagSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
                 </button>
@@ -1075,16 +1066,15 @@ function NoteApp() {
                   <Key className="w-3.5 h-3.5 text-amber-400" />
                   <span>Sercet</span>
                 </button>
-                
+
                 {/* 🛡️ AI 保密/啟用安全開關 */}
                 <button
                   type="button"
                   onClick={() => setIsAiEnabled(!isAiEnabled)}
-                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${
-                    isAiEnabled
-                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
-                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                  }`}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${isAiEnabled
+                    ? "bg-emerald-600 text-white shadow-emerald-950/50"
+                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    }`}
                   title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
                 >
                   <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
@@ -1096,7 +1086,7 @@ function NoteApp() {
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {viewMode === 'edit' ? (
                   <div className="flex flex-col gap-3 min-h-full pb-30">
-                    
+
                     {/* 🟠 1. 獨立橘框標題列：Placeholder 完全依據要求精準呈現！ */}
                     <div className="relative shrink-0">
                       <input
@@ -1142,7 +1132,7 @@ function NoteApp() {
                       {activeNoteData.title || "Untitled Note"}
                     </h1>
 
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
@@ -1164,19 +1154,17 @@ function NoteApp() {
                                 <button
                                   type="button"
                                   onClick={() => handleCopySecureText(value, keyId)}
-                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-all shrink-0 ${
-                                    copiedKey === keyId
-                                      ? "bg-emerald-600 text-white font-bold"
-                                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700/60"
-                                  }`}
+                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-all shrink-0 ${copiedKey === keyId
+                                    ? "bg-emerald-600 text-white font-bold"
+                                    : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700/60"
+                                    }`}
                                   title="點擊複製（30秒後自動清空剪貼簿）"
                                 >
-                                  <img 
-                                    src="/turtle.svg" 
-                                    alt="Turtle Icon" 
-                                    className={`w-3.5 h-3.5 object-contain transition-transform ${
-                                      copiedKey === keyId ? "scale-125 rotate-12" : ""
-                                    }`} 
+                                  <img
+                                    src="/turtle.svg"
+                                    alt="Turtle Icon"
+                                    className={`w-3.5 h-3.5 object-contain transition-transform ${copiedKey === keyId ? "scale-125 rotate-12" : ""
+                                      }`}
                                   />
                                   {copiedKey === keyId ? (
                                     <>
@@ -1193,9 +1181,9 @@ function NoteApp() {
                           return <p {...props}>{children}</p>;
                         },
                         img: ({ node, ...props }) => (
-                          <img 
-                            {...props} 
-                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md" 
+                          <img
+                            {...props}
+                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
                             alt={props.alt || "Note Image"}
                           />
                         ),
@@ -1224,17 +1212,15 @@ function NoteApp() {
                   className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 relative"
                   title={viewMode === 'edit' ? '點擊切換至預覽模式' : '點擊切換至編輯模式'}
                 >
-                  <img 
-                    src="/turtle2.svg" 
-                    alt="Turtle Mode Switcher" 
-                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
-                      viewMode === 'preview' ? 'scale-105 rotate-6' : ''
-                    }`}
+                  <img
+                    src="/turtle2.svg"
+                    alt="Turtle Mode Switcher"
+                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                      }`}
                   />
-                  
-                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${
-                    viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
-                  }`}>
+
+                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
+                    }`}>
                     {viewMode === 'edit' ? '編' : '閱'}
                   </span>
                 </button>
@@ -1293,9 +1279,8 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${
-                    isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
-                  }`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                    }`}
                   title="工具箱"
                 >
                   {isFabOpen ? (
@@ -1303,10 +1288,10 @@ function NoteApp() {
                       <X className="w-6 h-6" />
                     </div>
                   ) : (
-                    <img 
-                      src="/turtle1.svg" 
-                      alt="Turtle Toolbox" 
-                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" 
+                    <img
+                      src="/turtle1.svg"
+                      alt="Turtle Toolbox"
+                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
                     />
                   )}
                 </button>
@@ -1316,7 +1301,7 @@ function NoteApp() {
               <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end">
                 {isChatOpen && (
                   <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                    
+
                     {/* Chat Header */}
                     <div className="p-3.5 bg-neutral-950/90 border-b border-neutral-800 flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-2">
@@ -1350,11 +1335,10 @@ function NoteApp() {
                           className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${
-                              msg.role === 'user'
-                                ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
-                                : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
-                            }`}
+                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${msg.role === 'user'
+                              ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
+                              : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
+                              }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1407,11 +1391,10 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsChatOpen(!isChatOpen)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
-                    isChatOpen
-                      ? "bg-indigo-600 text-white scale-105"
-                      : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isChatOpen
+                    ? "bg-indigo-600 text-white scale-105"
+                    : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
+                    }`}
                   title="開啟 TurtleAI 筆記助手"
                 >
                   <Bot className="w-6 h-6" />
