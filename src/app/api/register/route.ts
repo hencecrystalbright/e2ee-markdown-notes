@@ -31,9 +31,13 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    // 🛡️ 雙重防護：強硬檢查「至少 1 個英文字母」與「至少 6 個數字」
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const digitCount = (password.match(/\d/g) || []).length;
+
+    if (!hasLetter || digitCount < 6) {
       return NextResponse.json(
-        { error: "密碼長度至少需 6 個字元! Password must be at least 6 characters long" },
+        { error: "密碼強度不符：必須包含至少 1 個英文字母與至少 6 個數字！Password must contain at least 1 letter and 6 digits." },
         { status: 400 }
       );
     }
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("註冊失敗!Failed Please try again!", error);
+    console.error("註冊失敗! Failed Please try again!", error);
     return NextResponse.json(
       { error: "伺服器錯誤，請稍後再試! Please try again later" },
       { status: 500 }
