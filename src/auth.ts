@@ -28,10 +28,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         // 2. Rate Limit 試錯檢查 (5 次上限)
-        const { isRateLimited } = checkRateLimit(clientIp, 5);
-
+        const account = credentials?.email as string;
+        const { isRateLimited } = checkRateLimit(clientIp, account, 5);
+        
         if (isRateLimited) {
-          throw new Error("⚠️ 登入失敗次數過多，IP 已暫時鎖定！請 18 分鐘後再試。");
+          throw new Error("⚠️ 登入失敗次數過多，IP 或 該帳號已被暫時鎖定！請 18 分鐘後再試。Many failed login . Please try again after 18 mins.");
         }
 
         // 3. 執行帳密驗證邏輯
@@ -53,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         // 4. 驗證成功，清除失敗紀錄
-        clearRateLimit(clientIp);
+        clearRateLimit(clientIp, account);
 
         // 回傳使用者物件 (包含 id)
         return { id: user.id, email: user.email, name: user.name };
