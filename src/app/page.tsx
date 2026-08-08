@@ -70,7 +70,7 @@ interface ChatMessage {
   content: string;
 }
 
-detectedDomainTagfunction NoteApp() {
+function NoteApp() {
   const { data: session, status } = useSession();
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>("");
