@@ -55,8 +55,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // 4. 驗證成功，清除失敗紀錄
         clearRateLimit(clientIp);
 
+        // 回傳使用者物件 (包含 id)
         return { id: user.id, email: user.email, name: user.name };
       },
     }),
   ],
+
+  // 🔑 最關鍵的修正：補上 Callbacks 將 user.id 鎖進 JWT & Session
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id; // 把 ID 塞進加密 Token
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string; // 從 Token 讀出 ID 賦予 Session
+      }
+      return session;
+    },
+  },
 });
