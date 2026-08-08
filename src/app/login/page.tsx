@@ -161,11 +161,11 @@ export default function LoginPage() {
             const lockUntil = Date.now() + LOCK_TIME_SECONDS * 1000;
             localStorage.setItem("login_lock_until", lockUntil.toString());
             setLockCountdown(LOCK_TIME_SECONDS);
-            setErrorMsg("⚠️ 登入失敗已達 5 次，系統已強制鎖定！請等 18 分鐘後再行登入。");
+            setErrorMsg("⚠️ 登入失敗已達 5 次，已強制鎖定！請等 18 分鐘後再行登入。Locked for 18 mins");
           } else if (newAttempts === 4) {
-            setErrorMsg("⚠️ 帳號或密碼錯誤！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
+            setErrorMsg("⚠️ 錯誤Error！如果再錯誤 1 次，需要等 18 分鐘再行登入。");
           } else {
-            setErrorMsg(`帳號或密碼錯誤，請重新確認 (剩餘嘗試次數: ${5 - newAttempts} 次)`);
+            setErrorMsg(`⚠️錯誤Error，請重新確認 (剩餘次數: ${5 - newAttempts} 次)`);
           }
         } else {
           setFailedAttempts(0);
@@ -281,7 +281,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 required
                 disabled={lockCountdown > 0}
-                placeholder={isRegister ? "需包含至少1個字母與6個數字" : "輸入您的密碼 at least 6 characters..."}
+                placeholder={isRegister ? "至少1個字母與6個數字At least 1 letter and 6 digits" : "輸入您的密碼 Please key in password..."}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
