@@ -151,7 +151,7 @@ function NoteApp() {
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
-  // 拆分標題與內文 Helper
+  // 拆分標題與內文 Helper (無值時維持空字串)
   const getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
@@ -172,7 +172,7 @@ function NoteApp() {
     return { title, body };
   };
 
-  // 建立新筆記
+  // 建立新筆記 (標題純空字串)
   const handleCreateNote = async () => {
     const newNoteData = {
       title: "",
@@ -262,11 +262,10 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-  // 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag (強力修復版)
+  // 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag
   const detectUrlTag = (content: string) => {
     if (!content) return null;
 
-    // 1. 先找完整的 HTTP/HTTPS 網址
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const match = content.match(urlRegex);
     if (match) {
@@ -291,7 +290,6 @@ function NoteApp() {
       }
     }
 
-    // 2. 若沒有標準網址，支援 URL: yahoo / URL: github 這類常用寫法
     const textLower = content.toLowerCase();
     if (textLower.includes('mail.google.com') || textLower.includes('gmail')) return 'Gmail';
     if (textLower.includes('yahoo')) return 'Yahoo';
@@ -613,7 +611,7 @@ function NoteApp() {
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
           
-          {/* 側邊欄 Header：登出鈕移至最左邊 (TurtleNote 左側) */}
+          {/* 側邊欄 Header：登出鈕位於最左邊 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
               <button 
@@ -749,7 +747,7 @@ function NoteApp() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm truncate text-neutral-200">
-                    {note.title || "Please key in title"}
+                    {note.title || "Untitled Note"}
                   </span>
                   {note.isEncrypted ? (
                     <Lock className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -794,7 +792,7 @@ function NoteApp() {
                 </button>
                 <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
                 <span className="font-medium text-sm text-neutral-300 truncate max-w-[100px] sm:max-w-[180px]">
-                  {activeNoteData.title || "Please key in title"}
+                  {activeNoteData.title || "Untitled Note"}
                 </span>
               </div>
               
@@ -901,7 +899,7 @@ function NoteApp() {
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
               
-              {/* 🏷️ 動態折疊 Tag 標籤控制列 (含智慧網址偵測膠囊) */}
+              {/* 🏷️ 動態折疊 Tag 標籤控制列 */}
               {isTagSectionOpen && (
                 <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg flex flex-col gap-2 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="flex items-center gap-1.5 flex-wrap text-xs">
@@ -975,7 +973,6 @@ function NoteApp() {
                       💳 #CreditCard
                     </button>
 
-                    {/* 💡 智慧網址/關鍵字自動辨識建議按鈕 */}
                     {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
                       <button
                         type="button"
@@ -1064,7 +1061,7 @@ function NoteApp() {
                   onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', '向左對齊內容')}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="向向左對齊"
+                  title="向左對齊"
                 >
                   <AlignLeft className="w-4 h-4" />
                 </button>
@@ -1091,7 +1088,7 @@ function NoteApp() {
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
 
-                {/* 🏷️ Tag 標籤動態折疊按鈕 (若偵測到建議 Tag 則閃爍提示) */}
+                {/* 🏷️ Tag 標籤動態折疊按鈕 */}
                 <button
                   type="button"
                   onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
@@ -1148,7 +1145,7 @@ function NoteApp() {
                 {viewMode === 'edit' ? (
                   <div className="flex flex-col gap-3 min-h-full pb-30">
                     
-                    {/* 🟠 1. 獨立橘框標題列 */}
+                    {/* 🟠 1. 獨立橘框標題列：Placeholder 完全依據要求精準呈現！ */}
                     <div className="relative shrink-0">
                       <input
                         ref={titleInputRef}
@@ -1162,7 +1159,7 @@ function NoteApp() {
                           }
                         }}
                         disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder="筆記標題（不加密，僅供搜尋）...Title (not encrypted). "
+                        placeholder="筆記標題（不加密，僅供搜尋）...Title (no encryption)."
                         className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
                       />
                     </div>
@@ -1190,7 +1187,7 @@ function NoteApp() {
                 ) : (
                   <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
                     <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
-                      {activeNoteData.title || "Please key in title"}
+                      {activeNoteData.title || "Untitled Note"}
                     </h1>
 
                     <ReactMarkdown 
