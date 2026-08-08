@@ -1,48 +1,65 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 
-// GET: 取得目前使用者的所有筆記
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
-  }
-
-  try {
-    const notes = await prisma.note.findMany({
-      where: { userId: session.user.id },
-      orderBy: { updatedAt: "desc" },
-    });
-    return NextResponse.json(notes);
-  } catch (error) {
-    return NextResponse.json({ error: "無法取得筆記" }, { status: 500 });
-  }
-}
-
-// POST: 建立新筆記
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
-  }
-
   try {
-    const { title, content, isEncrypted, tags } = await request.json();
+    const session = await auth();
 
-    const newNote = await prisma.note.create({
-      data: {
-        userId: session.user.id,
-        title: title || "",
-        content: content || "",
-        isEncrypted: isEncrypted || false,
-        tags: tags || [], // 👈 支援儲存 tags
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "🔒 未授權，請先登入後使用 AI 功能" }, { status: 401 });
+    }
+
+    const { messages, noteContext } = await request.json();
+
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      console.error("❌ 錯誤：尚未在 .env 或 Vercel 設定 DEEPSEEK_API_KEY");
+      return NextResponse.json({ error: "❌ 伺服器尚未配置 DeepSeek API Key" }, { status: 500 });
+    }
+
+    const systemPrompt = {
+      role: "system",
+      content: `你是一個專業、親切的筆記助理 TurtleAI 🐢。請根據使用者提供的筆記內容進行分析、摘要或回答。
+以下是使用者當前編輯的筆記內容：
+---
+${noteContext || "（目前筆記為空）"}
+---`
+    };
+
+    const apiMessages = [systemPrompt, ...messages];
+
+    // 呼叫 DeepSeek API
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
       },
+      body: JSON.stringify({
+        model: "deepseek-v4-flash",
+        messages: apiMessages,
+        stream: false,
+      }),
     });
 
-    return NextResponse.json(newNote);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ DeepSeek API 回應異常 (${response.status}):`, errorText);
+
+      if (response.status === 402) {
+        return NextResponse.json({ error: "❌ DeepSeek API 帳戶額度不足，請至官網儲值" }, { status: 402 });
+      }
+
+      return NextResponse.json({ error: `❌ AI 服務異常 (${response.status})` }, { status: response.status });
+    }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "無回應內容";
+
+    return NextResponse.json({ reply });
+
   } catch (error) {
-    console.error("建立筆記失敗:", error);
-    return NextResponse.json({ error: "建立筆記失敗" }, { status: 500 });
+    console.error("❌ /api/chat 內部錯誤:", error);
+    return NextResponse.json({ error: "❌ 伺服器內部錯誤，請稍後再試" }, { status: 500 });
   }
 }

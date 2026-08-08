@@ -1,35 +1,31 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth"; // 👈 確保直接引進 auth 驗證函式
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-// 1. 取得該使用者的所有筆記
+// GET: 取得目前使用者的所有筆記
 export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "未授權" }, { status: 401 });
+  }
+
   try {
-    const session = await auth();
-
-    if (!session || !session.user || !session.user.id) {
-      return NextResponse.json({ error: "未授權，請先登入" }, { status: 401 });
-    }
-
     const notes = await prisma.note.findMany({
       where: { userId: session.user.id },
       orderBy: { updatedAt: "desc" },
     });
-
     return NextResponse.json(notes);
   } catch (error) {
-    console.error("GET /api/notes 錯誤:", error);
-    return NextResponse.json({ error: "伺服器內部錯誤" }, { status: 500 });
+    return NextResponse.json({ error: "無法取得筆記" }, { status: 500 });
   }
 }
 
-// 2. 建立新筆記
+// POST: 建立新筆記
 export async function POST(request: Request) {
   try {
     const session = await auth();
-
-    if (!session || !session.user || !session.user.id) {
-      return NextResponse.json({ error: "未授權，請先登入" }, { status: 401 });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "未授權" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -46,7 +42,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newNote, { status: 201 });
   } catch (error) {
-    console.error("POST /api/notes 錯誤:", error);
     return NextResponse.json({ error: "建立筆記失敗" }, { status: 500 });
   }
 }
