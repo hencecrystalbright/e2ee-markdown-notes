@@ -262,44 +262,49 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-// 🛡️ 通用網址感測 Tag (不用硬寫清單，支援任何 Domain)
+// 🛡️ 超強通用感測 Tag (支援完整網址、網域名稱、單一關鍵字)
   const detectUrlTag = (content: string, currentTags: string[] = []) => {
     if (!content) return null;
 
-    // 1. 匹配標準 URL (http:// 或 https://)
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const matches = content.match(urlRegex);
+    // 1. 抓取全文所有「非空白」的單字/網址，並只取【最後輸入的那一個】
+    const tokens = content.trim().split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) return null;
 
-    if (matches && matches.length > 0) {
-      const lastUrlStr = matches[matches.length - 1]; // 取最後輸入的 URL
+    const lastToken = tokens[tokens.length - 1]; // 取得最後輸入的字詞 (例如 "yahoo" 或 "菜比八.com")
+
+    let extractedName = "";
+
+    // A. 處理完整 URL (http:// 或 https://)
+    if (/^https?:\/\//i.test(lastToken)) {
       try {
-        const url = new URL(lastUrlStr);
-        let host = url.hostname.toLowerCase().replace(/^www\./, '');
-        
-        // 抓取主 Domain (例如 finestar.com => finestar)
-        const parts = host.split('.');
-        const mainDomain = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-
-        if (mainDomain) {
-          const tag = mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
-          if (!currentTags.includes(tag)) return tag;
-        }
+        const url = new URL(lastToken);
+        const host = url.hostname.replace(/^www\./i, '');
+        extractedName = host.split('.')[0];
       } catch (e) {
-        // ignore
+        extractedName = lastToken.replace(/^https?:\/\//i, '').split('.')[0];
       }
+    } 
+    // B. 處理帶點的網域 (例如 yahoo.com 或 菜比八.com)
+    else if (lastToken.includes('.')) {
+      extractedName = lastToken.split('.')[0];
+    } 
+    // C. 處理單純關鍵字 (例如 yahoo、github、finestar)
+    else {
+      extractedName = lastToken;
     }
 
-    // 2. 匹配沒有 http 的網址格式 (例如 finestar.com 或 github.com)
-    const domainRegex = /([a-zA-Z0-9-]+\.(?:com|org|net|io|co|cc|tw|dev|app|xyz))[^\s]*/gi;
-    const domainMatches = content.match(domainRegex);
+    // 2. 清理特殊符號與前綴
+    extractedName = extractedName.replace(/^#/, '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '');
 
-    if (domainMatches && domainMatches.length > 0) {
-      const lastDomainStr = domainMatches[domainMatches.length - 1];
-      const mainName = lastDomainStr.split('.')[0].replace(/[^a-zA-Z0-9-]/g, '');
-      if (mainName) {
-        const tag = mainName.charAt(0).toUpperCase() + mainName.slice(1);
-        if (!currentTags.includes(tag)) return tag;
-      }
+    // 3. 過濾太短的字或 common 雜訊 (長度 < 2 不處理)
+    if (!extractedName || extractedName.length < 2) return null;
+
+    // 4. 轉為首字大寫格式 (例如 yahoo -> Yahoo, 菜比八 -> 菜比八)
+    const formattedTag = extractedName.charAt(0).toUpperCase() + extractedName.slice(1);
+
+    // 5. 如果這個 Tag 目前筆記還沒掛上，就回傳它！
+    if (!currentTags.includes(formattedTag)) {
+      return formattedTag;
     }
 
     return null;
