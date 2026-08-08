@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, clearRateLimit } from "@/lib/rateLimit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -11,56 +12,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
+      async authorize(credentials, req: any) {
+        // 1. 安全抽取 Client IP
+        const headers = req?.headers;
+        let clientIp = "127.0.0.1";
+
+        if (headers) {
+          const forwarded = typeof headers.get === "function" 
+            ? headers.get("x-forwarded-for") 
+            : (headers as Record<string, string>)["x-forwarded-for"];
+
+          if (forwarded) {
+            clientIp = forwarded.split(",")[0].trim();
+          }
         }
 
-        const email = credentials.email as string;
-        const password = credentials.password as string;
+        // 2. Rate Limit 試錯檢查 (5 次上限)
+        const { isRateLimited } = checkRateLimit(clientIp, 5);
 
-        // 1. 在資料庫搜尋使用者
+        if (isRateLimited) {
+          throw new Error("⚠️ 登入失敗次數過多，IP 已暫時鎖定！請 18 分鐘後再試。");
+        }
+
+        // 3. 執行帳密驗證邏輯
+        if (!credentials?.email || !credentials?.password) return null;
+
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: credentials.email as string },
         });
 
-        if (!user || !user.password) {
-          return null;
-        }
+        if (!user || !user.password) return null;
 
-        // 2. 比對加密密碼 (bcrypt)
-        const isValid = await bcrypt.compare(password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
 
         if (!isValid) {
           return null;
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
+        // 4. 驗證成功，清除失敗紀錄
+        clearRateLimit(clientIp);
+
+        return { id: user.id, email: user.email, name: user.name };
       },
     }),
   ],
-  session: { strategy: "jwt" },
-  callbacks: {
-    // 將 user.id 寫入 JWT token
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    // 將 token.id 轉存至 session.user.id，讓 API 可以直接讀取
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login", // 自訂登入頁面路徑
-  },
 });
