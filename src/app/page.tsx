@@ -262,23 +262,25 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-  // 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag
-  const detectUrlTag = (content: string) => {
+// 🛡️ 智慧 URL / 關鍵字自動偵測建議 Tag (動態比對版)
+  const detectUrlTag = (content: string, currentTags: string[] = []) => {
     if (!content) return null;
 
+    // 1. 優先匹配標準網址
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const match = content.match(urlRegex);
-    if (match) {
+    const urlMatches = content.match(urlRegex);
+    if (urlMatches) {
+      const lastUrl = urlMatches[urlMatches.length - 1]; // 取最新輸入的 URL
       try {
-        const url = new URL(match[0]);
+        const url = new URL(lastUrl);
         const hostname = url.hostname.toLowerCase();
 
         if (hostname.includes('mail.google.com')) return 'Gmail';
-        if (hostname.includes('google.com')) return 'Google';
         if (hostname.includes('github.com')) return 'Github';
+        if (hostname.includes('yahoo.com')) return 'Yahoo';
+        if (hostname.includes('google.com')) return 'Google';
         if (hostname.includes('aws.amazon.com')) return 'AWS';
         if (hostname.includes('facebook.com')) return 'Facebook';
-        if (hostname.includes('yahoo.com')) return 'Yahoo';
 
         const hostParts = hostname.replace('www.', '').split('.');
         if (hostParts.length >= 2) {
@@ -290,13 +292,16 @@ function NoteApp() {
       }
     }
 
-    const textLower = content.toLowerCase();
-    if (textLower.includes('mail.google.com') || textLower.includes('gmail')) return 'Gmail';
-    if (textLower.includes('yahoo')) return 'Yahoo';
-    if (textLower.includes('github')) return 'Github';
-    if (textLower.includes('google')) return 'Google';
-    if (textLower.includes('facebook')) return 'Facebook';
-    if (textLower.includes('aws')) return 'AWS';
+    // 2. 取最後一行輸入的文字進行單行精準匹配
+    const lines = content.split('\n').map(l => l.trim().toLowerCase()).filter(Boolean);
+    const lastLine = lines[lines.length - 1] || "";
+
+    if (lastLine.includes('github') && !currentTags.includes('Github')) return 'Github';
+    if (lastLine.includes('yahoo') && !currentTags.includes('Yahoo')) return 'Yahoo';
+    if ((lastLine.includes('gmail') || lastLine.includes('mail.google.com')) && !currentTags.includes('Gmail')) return 'Gmail';
+    if (lastLine.includes('google') && !currentTags.includes('Google')) return 'Google';
+    if (lastLine.includes('aws') && !currentTags.includes('AWS')) return 'AWS';
+    if (lastLine.includes('facebook') && !currentTags.includes('Facebook')) return 'Facebook';
 
     return null;
   };
