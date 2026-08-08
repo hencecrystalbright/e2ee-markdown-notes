@@ -70,7 +70,7 @@ interface ChatMessage {
   content: string;
 }
 
-function NoteApp() {
+detectedDomainTagfunction NoteApp() {
   const { data: session, status } = useSession();
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>("");
@@ -262,53 +262,6 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-// 🛡️ 超強通用感測 Tag (支援完整網址、網域名稱、單一關鍵字)
-  const detectUrlTag = (content: string, currentTags: string[] = []) => {
-    if (!content) return null;
-
-    // 1. 抓取全文所有「非空白」的單字/網址，並只取【最後輸入的那一個】
-    const tokens = content.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length === 0) return null;
-
-    const lastToken = tokens[tokens.length - 1]; // 取得最後輸入的字詞 (例如 "yahoo" 或 "菜比八.com")
-
-    let extractedName = "";
-
-    // A. 處理完整 URL (http:// 或 https://)
-    if (/^https?:\/\//i.test(lastToken)) {
-      try {
-        const url = new URL(lastToken);
-        const host = url.hostname.replace(/^www\./i, '');
-        extractedName = host.split('.')[0];
-      } catch (e) {
-        extractedName = lastToken.replace(/^https?:\/\//i, '').split('.')[0];
-      }
-    } 
-    // B. 處理帶點的網域 (例如 yahoo.com 或 菜比八.com)
-    else if (lastToken.includes('.')) {
-      extractedName = lastToken.split('.')[0];
-    } 
-    // C. 處理單純關鍵字 (例如 yahoo、github、finestar)
-    else {
-      extractedName = lastToken;
-    }
-
-    // 2. 清理特殊符號與前綴
-    extractedName = extractedName.replace(/^#/, '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '');
-
-    // 3. 過濾太短的字或 common 雜訊 (長度 < 2 不處理)
-    if (!extractedName || extractedName.length < 2) return null;
-
-    // 4. 轉為首字大寫格式 (例如 yahoo -> Yahoo, 菜比八 -> 菜比八)
-    const formattedTag = extractedName.charAt(0).toUpperCase() + extractedName.slice(1);
-
-    // 5. 如果這個 Tag 目前筆記還沒掛上，就回傳它！
-    if (!currentTags.includes(formattedTag)) {
-      return formattedTag;
-    }
-
-    return null;
-  };
 
   // 🛡️ 一鍵複製與 30 秒自動清空剪貼簿機制
   const handleCopySecureText = (text: string, keyIdentifier: string) => {
@@ -599,8 +552,7 @@ function NoteApp() {
   );
 
   const activeNoteData = getNoteTitleAndBody(activeNote);
-  const detectedDomainTag = activeNote ? detectUrlTag(`${activeNoteData.title}\n${activeNoteData.body}`) : null;
-
+  
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
       
@@ -982,16 +934,7 @@ function NoteApp() {
                       💳 #CreditCard
                     </button>
 
-                    {detectedDomainTag && !(activeNote.tags || []).includes(detectedDomainTag) && (
-                      <button
-                        type="button"
-                        onClick={() => handleAddTag(detectedDomainTag)}
-                        className="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-600/80 text-indigo-300 hover:bg-indigo-900 transition-all shrink-0 flex items-center gap-1 animate-pulse"
-                      >
-                        <span>💡 偵測到網址，加入</span>
-                        <span className="font-bold">#{detectedDomainTag}</span>
-                      </button>
-                    )}
+                    
                   </div>
                 </div>
               )}
