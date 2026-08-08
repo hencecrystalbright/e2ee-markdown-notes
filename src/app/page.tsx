@@ -167,7 +167,7 @@ function NoteApp() {
 
     const decrypted = decryptText(note.content, passphrase);
     const parts = decrypted.split("\n");
-    const title = parts[0]?.replace(/^#*\s*/, "") || note.title || "";
+    const title = parts[0] !== undefined ? parts[0].replace(/^#*\s*/, "") : (note.title || "");
     const body = parts.slice(1).join("\n");
     return { title, body };
   };
