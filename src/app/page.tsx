@@ -388,6 +388,40 @@ function NoteApp() {
         end: textareaRef.current.selectionEnd,
       };
     }
+  };// 處理自動縮網址的貼上攔截
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData('text');
+    const url = pastedText.trim();
+
+    // 嚴格判斷：只攔截「純網址」且長度超過 30 個字元才縮網址，避免干擾普通文字貼上
+    if (/^https?:\/\/[^\s]+$/.test(url) && url.length > 30) {
+      e.preventDefault(); // 攔截瀏覽器預設的貼上動作
+
+      const loadingMark = `[⏳ 產生短網址中...]`;
+      insertFormatting(loadingMark, "", ""); // 先在游標處顯示佔位符，讓畫面不卡頓
+
+      try {
+        // 呼叫 TinyURL API (免金鑰、永久有效)
+        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+        const shortUrl = res.ok ? await res.text() : url; // 成功給短網址，失敗退回長網址
+
+        // 讀取當前最新的編輯器內容並無縫替換
+        if (textareaRef.current) {
+          const currentBody = textareaRef.current.value;
+          const newBody = currentBody.replace(loadingMark, shortUrl);
+          const { title } = getNoteTitleAndBody(activeNote);
+          handleSaveNoteData(title, newBody); // 觸發你原本的儲存與加密邏輯
+        }
+      } catch (error) {
+        // 遇到網路錯誤，安全退回原始長網址
+        if (textareaRef.current) {
+          const currentBody = textareaRef.current.value;
+          const newBody = currentBody.replace(loadingMark, url);
+          const { title } = getNoteTitleAndBody(activeNote);
+          handleSaveNoteData(title, newBody);
+        }
+      }
+    }
   };
 
   const insertFormatting = (prefix: string, suffix: string = "", defaultText: string = "") => {
@@ -1115,6 +1149,7 @@ function NoteApp() {
                       onClick={updateSelection}
                       onKeyUp={updateSelection}
                       onSelect={updateSelection}
+                      onPaste={handlePaste} // 👈 加上這行，綁定剛寫好的網址攔截器
                       disabled={activeNote.isEncrypted && !passphrase}
                       placeholder="從這裡開始輸入機密內容（會隨設定加密，保護隱私）...The following is protected by AES-256 encryption."
                       className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
