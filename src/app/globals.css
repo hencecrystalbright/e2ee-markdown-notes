@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 🛠️ 強制修復 Markdown 換行與 <br> 標籤無效問題 */
+.prose br {
+  display: block;
+  content: "";
+  margin-top: 0.5em;
+}
+
+.prose p {
+  white-space: pre-wrap; /* 允許自然 Enter 換行，不壓縮連續空白 */
+  margin-bottom: 0.75em; /* 讓段落之間有好看的空行間距 */
+}
