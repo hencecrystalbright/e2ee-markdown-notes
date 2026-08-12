@@ -1128,7 +1128,7 @@ function NoteApp() {
 
                     {/* 🔑 修正 1：加上 remarkBreaks 與 rehypeRaw，支援按 Enter 換行與 <br> 解析 */}
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         p: ({ node, children, ...props }) => {
@@ -1158,8 +1158,7 @@ function NoteApp() {
                                   <img
                                     src="/turtle.svg"
                                     alt="Turtle Icon"
-                                    className={`w-3.5 h-3.5 object-contain transition-transform ${copiedKey === keyId ? "scale-125 rotate-12" : ""
-                                      }`}
+                                    className={`w-3.5 h-3.5 object-contain transition-transform ${copiedKey === keyId ? "scale-125 rotate-12" : ""}`}
                                   />
                                   {copiedKey === keyId ? (
                                     <>
@@ -1173,7 +1172,13 @@ function NoteApp() {
                               </p>
                             );
                           }
-                          return <p {...props}>{children}</p>;
+
+                          // 🎯 關鍵修復：給一般的 <p> 強制加上 leading-normal 與 my-0，並用 white-space: pre-wrap
+                          return (
+                            <p className="my-0 leading-normal whitespace-pre-wrap" {...props}>
+                              {children}
+                            </p>
+                          );
                         },
                         img: ({ node, ...props }) => (
                           <img
@@ -1337,7 +1342,7 @@ function NoteApp() {
                           >
                             <div className="prose prose-invert max-w-none text-xs">
                               {/* 🔑 修正 2：對話框訊息亦加入 remarkBreaks 與 rehypeRaw */}
-                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                                 {msg.content}
                               </ReactMarkdown>
                             </div>
