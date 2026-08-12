@@ -1127,7 +1127,7 @@ function NoteApp() {
                     </h1>
 
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         p: ({ node, children, ...props }) => {
@@ -1173,7 +1173,7 @@ function NoteApp() {
                           }
 
                           return (
-                            <p className="mb-4 leading-relaxed whitespace-pre-wrap break-words" {...props}>
+                            <p className="my-0 leading-normal" {...props}>
                               {children}
                             </p>
                           );
@@ -1186,7 +1186,7 @@ function NoteApp() {
                           />
                         ),
                         a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 break-all inline" />
+                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 break-all" />
                         )
                       }}
                     >
