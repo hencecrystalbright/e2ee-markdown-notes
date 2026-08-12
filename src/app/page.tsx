@@ -1121,14 +1121,13 @@ function NoteApp() {
                     />
                   </div>
                 ) : (
-                  <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
+                  <div className="prose prose-invert max-w-none pb-30 text-neutral-200 [&_p]:my-0 [&_p]:leading-normal">
                     <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
                       {activeNoteData.title || "Untitled Note"}
                     </h1>
 
-                    {/* 🔑 修正 1：加上 remarkBreaks 與 rehypeRaw，支援按 Enter 換行與 <br> 解析 */}
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         p: ({ node, children, ...props }) => {
@@ -1173,9 +1172,8 @@ function NoteApp() {
                             );
                           }
 
-                          // 🎯 關鍵修復：給一般的 <p> 強制加上 leading-normal 與 my-0，並用 white-space: pre-wrap
                           return (
-                            <p className="my-0 leading-normal whitespace-pre-wrap" {...props}>
+                            <p className="my-0 leading-normal" {...props}>
                               {children}
                             </p>
                           );
@@ -1188,7 +1186,7 @@ function NoteApp() {
                           />
                         ),
                         a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300" />
+                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 break-all" />
                         )
                       }}
                     >
@@ -1341,8 +1339,7 @@ function NoteApp() {
                               }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
-                              {/* 🔑 修正 2：對話框訊息亦加入 remarkBreaks 與 rehypeRaw */}
-                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
                                 {msg.content}
                               </ReactMarkdown>
                             </div>
