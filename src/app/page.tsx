@@ -45,12 +45,15 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react";
+
+// 加解密與工具
 import { encryptText, decryptText } from "@/lib/crypto";
 
-// 匯入 Markdown 渲染套件
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
+// Markdown 渲染與插件套件 (獨立 Import)
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import rehypeRaw from "rehype-raw";
 
 // 匯入 Word 轉 Markdown 套件
 import mammoth from 'mammoth';
@@ -261,7 +264,6 @@ function NoteApp() {
     const newTags = currentTags.filter((t) => t !== tagToRemove);
     handleSaveNoteData(title, body, newTags);
   };
-
 
   // 🛡️ 一鍵複製與 30 秒自動清空剪貼簿機制
   const handleCopySecureText = (text: string, keyIdentifier: string) => {
@@ -1079,7 +1081,7 @@ function NoteApp() {
                 {viewMode === 'edit' ? (
                   <div className="flex flex-col gap-3 min-h-full pb-30">
 
-                    {/* 🟠 1. 獨立橘框標題列：Placeholder 完全依據要求精準呈現！ */}
+                    {/* 🟠 1. 獨立橘框標題列 */}
                     <div className="relative shrink-0">
                       <input
                         ref={titleInputRef}
@@ -1124,8 +1126,9 @@ function NoteApp() {
                       {activeNoteData.title || "Untitled Note"}
                     </h1>
 
+                    {/* 🔑 修正 1：加上 remarkBreaks 與 rehypeRaw，支援按 Enter 換行與 <br> 解析 */}
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         p: ({ node, children, ...props }) => {
@@ -1333,7 +1336,8 @@ function NoteApp() {
                               }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {/* 🔑 修正 2：對話框訊息亦加入 remarkBreaks 與 rehypeRaw */}
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
                                 {msg.content}
                               </ReactMarkdown>
                             </div>
