@@ -1140,7 +1140,7 @@ function NoteApp() {
                             const keyId = `${activeNote.id}_${label}_${value}`;
 
                             return (
-                              <div className="flex items-center justify-between gap-2 bg-neutral-900/90 border border-neutral-800 px-3 py-2 rounded-lg font-mono text-xs my-2 shadow-md max-w-lg">
+                              <div className="flex items-center justify-between gap-2 bg-neutral-900/90 border border-neutral-800 px-3 py-2 rounded-lg font-mono text-xs my-1 shadow-md max-w-lg">
                                 <div className="flex items-center gap-2 truncate flex-1">
                                   <span className="text-emerald-400 font-semibold shrink-0">{label}:</span>
                                   <span className="truncate text-neutral-200">{value}</span>
@@ -1181,7 +1181,7 @@ function NoteApp() {
                         img: ({ node, ...props }) => (
                           <img
                             {...props}
-                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
+                            className="max-w-full h-auto rounded-lg my-1 border border-neutral-800 shadow-md"
                             alt={props.alt || "Note Image"}
                           />
                         ),
