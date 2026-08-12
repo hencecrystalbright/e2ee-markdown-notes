@@ -1127,7 +1127,7 @@ function NoteApp() {
                     </h1>
 
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      remarkPlugins={[[remarkGfm, { singleTilde: false }]]} // 👈 改成這樣
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         p: ({ node, children, ...props }) => {
@@ -1339,7 +1339,9 @@ function NoteApp() {
                               }`}
                           >
                             <div className="prose prose-invert max-w-none text-xs">
-                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
+                              <ReactMarkdown
+                                remarkPlugins={[[remarkGfm, { singleTilde: false }]]} // 👈 這裡也改 
+                                rehypePlugins={[rehypeRaw]}>
                                 {msg.content}
                               </ReactMarkdown>
                             </div>
