@@ -1173,7 +1173,7 @@ function NoteApp() {
                           }
 
                           return (
-                            <p className="my-0 leading-normal" {...props}>
+                            <p className="my-3 leading-relaxed" {...props}>
                               {children}
                             </p>
                           );
