@@ -25,13 +25,3 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 🛠️ Markdown 完美還原：編輯器怎麼排，預覽就怎麼呈現 */
-.prose p {
-  white-space: pre-wrap !important; /* 核心：讀取真實換行 \n，不隨意加高，完全同 textarea 表現 */
-  margin-top: 0 !important;
-  margin-bottom: 0.5em !important;
-}
-
-.prose br {
-  display: inline;
-}
