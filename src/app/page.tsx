@@ -1305,15 +1305,15 @@ function NoteApp() {
                 </span>
               </div>
 
-              {/* 右下角球型折疊工具箱 (位置在最下方不變，改為「向左展開」) */}
-              <div className="fixed bottom-6 right-6 z-20 flex items-center justify-end">
+              {/* 右下角球型折疊工具箱 (位置移到 AI 上方，維持「向上展開」) */}
+              <div className="fixed bottom-24 right-6 z-20 flex flex-col items-end gap-2">
                 {isFabOpen && (
-                  <div className="flex items-center gap-2 mr-3 animate-in fade-in slide-in-from-right-5 duration-200">
+                  <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
                       <span>Markdown</span>
                       <FileCode className="w-4 h-4 text-emerald-400" />
@@ -1323,7 +1323,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => wordInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
                       <span>Word (.docx)</span>
                       <Upload className="w-4 h-4 text-blue-400" />
@@ -1333,7 +1333,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
                       <span>{language === 'zh' ? '相機' : 'Camera'}</span>
                       <Camera className="w-4 h-4 text-emerald-400" />
@@ -1343,7 +1343,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => imageInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
                       <span>{language === 'zh' ? '圖片' : 'Picture'}</span>
                       <ImageIcon className="w-4 h-4 text-emerald-400" />
@@ -1354,7 +1354,7 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
                     }`}
                   title={language === 'zh' ? '工具箱' : 'Toolbox'}
                 >
@@ -1372,8 +1372,8 @@ function NoteApp() {
                 </button>
               </div>
 
-              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 (位置在上方不變) */}
-              <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end">
+              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 (位置降到最下方) */}
+              <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end">
                 {isChatOpen && (
                   <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 
