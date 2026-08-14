@@ -1253,7 +1253,8 @@ function NoteApp() {
                             );
                           }
 
-                          return <p className="mb-4 leading-relaxed break-words whitespace-pre-wrap" {...props}>{children}</p>;
+                          // ✅ 修正後的新版本（刪除 whitespace-pre-wrap）
+                          return <p className="mb-4 leading-relaxed break-words" {...props}>{children}</p>;
                         },
                         img: ({ node, ...props }) => (
                           <img
@@ -1389,8 +1390,8 @@ function NoteApp() {
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
                           </h3>
                           <p className="text-[10px] text-neutral-400">
-                            {isAiEnabled 
-                              ? (language === 'zh' ? "🟢 AI ON · 已開啟當前筆記感知" : "🟢 AI ON · Note context aware") 
+                            {isAiEnabled
+                              ? (language === 'zh' ? "🟢 AI ON · 已開啟當前筆記感知" : "🟢 AI ON · Note context aware")
                               : (language === 'zh' ? "🔴 AI OFF · 狀態保護中 (禁止傳送內容)" : "🔴 AI OFF · Privacy protected (No content sent)")}
                           </p>
                         </div>
@@ -1448,8 +1449,8 @@ function NoteApp() {
                     >
                       <input
                         type="text"
-                        placeholder={isAiEnabled 
-                          ? (language === 'zh' ? "詢問 AI 或輸入指令..." : "Ask AI or enter command...") 
+                        placeholder={isAiEnabled
+                          ? (language === 'zh' ? "詢問 AI 或輸入指令..." : "Ask AI or enter command...")
                           : (language === 'zh' ? "🔒 AI 功能目前關閉中..." : "🔒 AI is currently disabled...")}
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
