@@ -765,37 +765,54 @@ function NoteApp() {
             ))}
         </div>
 
-        {/* 👇 新增：側邊欄左下角的設定與登出區塊 👇 */}
-        <div className="p-3 border-t border-neutral-800 bg-neutral-950/40 flex items-center justify-between shrink-0">
-          {/* 左側：設定與語言 */}
-          <div className="flex items-center gap-1.5">
-            <button
-              className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded-md transition-colors"
-              title="設定"
-            >
-              <img
-                src="/fish1.svg"
-                alt="setup Mode"
-                className={`w-5 h-5 object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
-                  }`}
-              />
-            </button>
-            <button
-              className="px-2 py-1 border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded text-[10px] font-bold transition-colors"
-              title="語言切換 (開發中)"
-            >
-              中 / EN
-            </button>
-          </div>
+        {/* 👇 新增：可折疊的側邊欄左下角設定區塊 👇 */}
+        <div className="border-t border-neutral-800 bg-neutral-950/60 flex flex-col shrink-0">
+          
+          {/* 展開時顯示的內容 (語言切換、登出) */}
+          {isSettingsOpen && (
+            <div className="p-3 flex items-center justify-between border-b border-neutral-800/50 bg-neutral-900/30 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <button
+                className="px-2.5 py-1 border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded text-[11px] font-bold transition-colors shadow-sm"
+                title="語言切換 (開發中)"
+              >
+                中 / EN
+              </button>
 
-          {/* 右側：登出按鈕 */}
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors text-[11px] font-medium shadow-sm"
+                title="登出帳號"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>登出</span>
+              </button>
+            </div>
+          )}
+
+          {/* 底部固定按鈕：點擊切換折疊狀態 */}
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-medium"
-            title="登出帳號"
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            className="p-3 flex items-center justify-between hover:bg-neutral-900 transition-colors w-full text-left outline-none"
+            title="系統設定"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>登出</span>
+            <div className="flex items-center gap-2.5">
+              {/* 🎯 這裡已經幫你把小魚的尺寸鎖死在 w-5 h-5，絕對不會再變巨大了 */}
+              <img 
+                src="/fish1.svg" 
+                alt="Settings" 
+                className="w-5 h-5 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
+              />
+              <span className="text-xs font-medium text-neutral-300">System Setup</span>
+            </div>
+            
+            {/* 箭頭會根據展開/收合狀態改變方向 */}
+            {isSettingsOpen ? (
+              <ChevronDown className="w-4 h-4 text-neutral-500" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-neutral-500" />
+            )}
+          </button>
+        </div>
           </button>
         </div>
 
