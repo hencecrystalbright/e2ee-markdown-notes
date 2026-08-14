@@ -90,6 +90,8 @@ function NoteApp() {
   // RWD 與工具箱 State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [language, setLanguage] = useState<'zh' | 'en'>('zh'); // 👈 新增：控制語言狀態
 
   // 🏷️ Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
@@ -765,47 +767,53 @@ function NoteApp() {
             ))}
         </div>
 
-        {/* 👇 新增：可折疊的側邊欄左下角設定區塊 👇 */}
-        <div className="border-t border-neutral-800 bg-neutral-950/60 flex flex-col shrink-0">
+        {/* ...上面是筆記清單的 </div> ... */}
+        </div>
+
+        {/* 👇 全新重構：專業版左下角設定與浮出選單 👇 */}
+        <div className="relative mt-auto border-t border-neutral-800 bg-neutral-900 shrink-0">
           
-          {/* 展開時顯示的內容 (語言切換、登出) */}
+          {/* 浮出選單 (Pop-up Menu) */}
           {isSettingsOpen && (
-            <div className="p-3 flex items-center justify-between border-b border-neutral-800/50 bg-neutral-900/30 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="absolute bottom-[100%] left-0 w-full bg-neutral-900 border-t border-neutral-800 p-2.5 flex flex-col gap-2 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+              
+              {/* 語言切換按鈕 */}
               <button
-                className="px-2.5 py-1 border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded text-[11px] font-bold transition-colors shadow-sm"
-                title="語言切換 (開發中)"
+                onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+                className="flex items-center justify-center w-full py-2 border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-md text-xs font-bold transition-colors shadow-sm"
               >
-                中 / EN
+                {language === 'zh' ? '🌐 切換至英文 (English)' : '🌐 Switch to Chinese'}
               </button>
 
+              {/* 登出按鈕 */}
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors text-[11px] font-medium shadow-sm"
-                title="登出帳號"
+                className="flex items-center justify-center gap-2 w-full py-2 rounded-md text-red-400 border border-red-900/30 hover:text-white hover:bg-red-600 transition-colors text-xs font-medium shadow-sm"
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>登出</span>
+                <LogOut className="w-4 h-4" />
+                <span>{language === 'zh' ? '登出帳號' : 'Sign Out'}</span>
               </button>
             </div>
           )}
 
-          {/* 底部固定按鈕：點擊切換折疊狀態 */}
+          {/* 固定在底部的觸發按鈕 (鎖死魚的尺寸) */}
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="p-3 flex items-center justify-between hover:bg-neutral-900 transition-colors w-full text-left outline-none"
-            title="系統設定"
+            className="w-full p-3.5 flex items-center justify-between hover:bg-neutral-800 transition-colors outline-none"
+            title={language === 'zh' ? '系統設定' : 'Settings'}
           >
-            <div className="flex items-center gap-2.5">
-              {/* 🎯 這裡已經幫你把小魚的尺寸鎖死在 w-5 h-5，絕對不會再變巨大了 */}
+            <div className="flex items-center gap-3">
+              {/* 🎯 鎖死尺寸 w-6 h-6，保證魚絕對不會變大 */}
               <img 
                 src="/fish1.svg" 
                 alt="Settings" 
-                className="w-5 h-5 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
+                className="w-6 h-6 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
               />
-              <span className="text-xs font-medium text-neutral-300">System Setup</span>
+              <span className="text-sm font-medium text-neutral-200">
+                {language === 'zh' ? '系統設定' : 'System Setup'}
+              </span>
             </div>
             
-            {/* 箭頭會根據展開/收合狀態改變方向 */}
             {isSettingsOpen ? (
               <ChevronDown className="w-4 h-4 text-neutral-500" />
             ) : (
@@ -813,9 +821,9 @@ function NoteApp() {
             )}
           </button>
         </div>
-          
 
-      </aside>
+      </aside> {/* 這是側邊欄的結尾 */}
+
 
       {/* 主編輯區域 */}
 
