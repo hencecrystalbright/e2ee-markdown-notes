@@ -1356,7 +1356,7 @@ function NoteApp() {
                   onClick={() => setIsFabOpen(!isFabOpen)}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
                     }`}
-                  title="工具箱"
+                  title={language === 'zh' ? '工具箱' : 'Tools'}
                 >
                   {isFabOpen ? (
                     <div className="w-12 h-12 rounded-full bg-neutral-800/90 border border-neutral-700 flex items-center justify-center text-neutral-200 shadow-xl backdrop-blur-sm">
@@ -1385,7 +1385,7 @@ function NoteApp() {
                         </div>
                         <div>
                           <h3 className="text-xs font-bold text-neutral-100 flex items-center gap-1.5">
-                            TurtleAI 助手
+                            {language === 'zh' ? 'Turtle AI ' : 'Turtle AI'}
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
                           </h3>
                           <p className="text-[10px] text-neutral-400">
