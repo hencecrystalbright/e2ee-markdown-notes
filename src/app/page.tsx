@@ -934,672 +934,608 @@ function NoteApp() {
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
 
-              {/* 🏷️ 動態折疊 Tag 標籤控制列（單行整合版） */}
-              {isTagSectionOpen && (
-                <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                    <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
 
-                    {/* 已掛上的 Tag */}
-                    {activeNote?.tags?.map((t) => (
-                      <span
-                        key={t}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
-                      >
-                        #{t}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(t)}
-                          className="hover:text-red-400 transition-colors"
+                {/* 🏷️ 動態折疊 Tag 標籤控制列（單行整合版） */}
+                {isTagSectionOpen && (
+                  <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                      <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+
+                      {/* 已掛上的 Tag */}
+                      {activeNote?.tags?.map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
                         >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-
-                    {/* 自訂 Tag 輸入框 */}
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleAddTag(tagInput);
-                      }}
-                      className="inline-flex items-center"
-                    >
-                      <input
-                        type="text"
-                        placeholder="+ Tag..."
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
-                      />
-                    </form>
-
-                    {/* 分隔線 */}
-                    <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
-
-                    {/* 常用預設 Tag 按鈕 */}
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("Password")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      🔑 #Password
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("AuthKey")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      ⚡ #AuthKey
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("SSHKey")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      🛡️ #SSH_Key
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* 👇 新增：動態折疊 Icon 快速選單 👇 */}
-              {isEmojiSectionOpen && (
-                <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center gap-1.5 flex-wrap text-base">
-                    <span className="text-xs text-neutral-500 mr-1 font-bold">
-                      {language === 'zh' ? '段落圖示：' : 'Icons:'}
-                    </span>
-                    {/* 這裡面的圖示你可以隨意增減替換 */}
-                    {['🛡️', '💡', '📌', '⚠️', '✅', '❌', '🚀', '🎯', '📈', '📊', '📝', '🔧', '🔥', '⭐', '👉', '💬'].map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => insertFormatting(emoji + " ", "", "")}
-                        disabled={activeNote.isEncrypted && !passphrase}
-                        className="hover:bg-neutral-800 hover:scale-125 p-1.5 rounded-md transition-all flex items-center justify-center disabled:opacity-40"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-                <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                  <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-
-                  {/* 已掛上的 Tag */}
-                  {activeNote?.tags?.map((t) => (
-                    <span
-                      key={t}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
-                    >
-                      #{t}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(t)}
-                        className="hover:text-red-400 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-
-                  {/* 自訂 Tag 輸入框 */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleAddTag(tagInput);
-                    }}
-                    className="inline-flex items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="+ Tag..."
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
-                    />
-                  </form>
-
-                  {/* 分隔線 */}
-                  <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
-
-                  {/* 常用預設 Tag 按鈕 */}
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("Password")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                  >
-                    🔑 #Password
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("AuthKey")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                  >
-                    ⚡ #AuthKey
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddTag("SSHKey")}
-                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                  >
-                    🛡️ #SSH_Key
-                  </button>
-                </div>
-              </div>
-              )}
-
-              {/* 格式工具列 */}
-              <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("**", "**", language === 'zh' ? "粗體文字" : "Bold text")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "粗體" : "Bold"}
-                >
-                  <Bold className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("*", "*", language === 'zh' ? "斜體文字" : "Italic text")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "斜體" : "Italic"}
-                >
-                  <Italic className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("~~", "~~", language === 'zh' ? "刪除線文字" : "Strikethrough text")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "刪除線" : "Strikethrough"}
-                >
-                  <Strikethrough className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("<mark>", "</mark>", language === 'zh' ? "高亮文字" : "Highlighted text")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-amber-300 rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "高亮" : "Highlight"}
-                >
-                  <Highlighter className="w-4 h-4" />
-                </button>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-
-                <div className="relative flex items-center shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => colorInputRef.current?.click()}
-                    disabled={activeNote.isEncrypted && !passphrase}
-                    className="p-1.5 hover:bg-neutral-800 rounded transition flex items-center gap-1 disabled:opacity-40"
-                    title={language === 'zh' ? "選取文字顏色" : "Text Color"}
-                  >
-                    <Palette className="w-4 h-4" style={{ color: textColor }} />
-                  </button>
-                  <input
-                    type="color"
-                    ref={colorInputRef}
-                    value={textColor}
-                    onChange={(e) => {
-                      setTextColor(e.target.value);
-                      insertFormatting(`<span style="color: ${e.target.value}">`, "</span>", language === 'zh' ? "彩色文字" : "Colored text");
-                    }}
-                    className="absolute opacity-0 w-0 h-0 pointer-events-none"
-                  />
-                </div>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', language === 'zh' ? '向左對齊內容' : 'Align left content')}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "向左對齊" : "Align Left"}
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting('\n<div align="center">\n', '\n</div>\n', language === 'zh' ? '置中對齊內容' : 'Align center content')}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "置中對齊" : "Align Center"}
-                >
-                  <AlignCenter className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting('\n<div align="right">\n', '\n</div>\n', language === 'zh' ? '向右對齊內容' : 'Align right content')}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title={language === 'zh' ? "向右對齊" : "Align Right"}
-                >
-                  <AlignRight className="w-4 h-4" />
-                </button>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-                
-                {/* 👇 新增：Icon 標籤動態折疊按鈕 👇 */}
-                <button
-                  type="button"
-                  onClick={() => setIsEmojiSectionOpen(!isEmojiSectionOpen)}
-                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isEmojiSectionOpen
-                    ? "bg-indigo-950 border border-indigo-600 text-indigo-300"
-                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                    }`}
-                  title={isEmojiSectionOpen
-                    ? (language === 'zh' ? "點擊收合 Icon 面板" : "Click to collapse Icon panel")
-                    : (language === 'zh' ? "點擊展開 Icon 面板" : "Click to expand Icon panel")}
-                >
-                  <Smile className="w-3.5 h-3.5" />
-                  <span>Icon</span>
-                  {isEmojiSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
-                </button>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-                {/* 🏷️ Tag 標籤動態折疊按鈕 */}
-                <button
-                  type="button"
-                  onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
-                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isTagSectionOpen
-                    ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
-                    : (activeNote.tags && activeNote.tags.length > 0)
-                      ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
-                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                    }`}
-                  title={isTagSectionOpen
-                    ? (language === 'zh' ? "點擊收合 Tag 面板" : "Click to collapse Tag panel")
-                    : (language === 'zh' ? "點擊展開 Tag 面板" : "Click to expand Tag panel")}
-                >
-                  <TagIcon className="w-3.5 h-3.5" />
-                  <span>
-                    Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}
-                  </span>
-                  {isTagSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
-                </button>
-
-                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
-
-                <button
-                  type="button"
-                  onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
-                  disabled={activeNote.isEncrypted && !passphrase}
-                  className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
-                  title={language === 'zh' ? "插入結構化帳號密碼範本" : "Insert structured credential template"}
-                >
-                  <Key className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Secret</span>
-                </button>
-
-                {/* 🛡️ AI 保密/啟用安全開關 */}
-                <button
-                  type="button"
-                  onClick={() => setIsAiEnabled(!isAiEnabled)}
-                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${isAiEnabled
-                    ? "bg-emerald-600 text-white shadow-emerald-950/50"
-                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
-                    }`}
-                  title={isAiEnabled
-                    ? (language === 'zh' ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI Enabled: Decrypted note content can be analyzed by AI")
-                    : (language === 'zh' ? "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI" : "AI Disabled: Privacy protected, no notes sent to AI")}
-                >
-                  <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
-                  <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
-                </button>
-              </div>
-
-              {/* 編輯器 / 預覽器 切換顯示區域 */}
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                {viewMode === 'edit' ? (
-                  <div className="flex flex-col gap-3 min-h-full pb-30">
-
-                    {/* 🟠 1. 獨立橘框標題列 */}
-                    <div className="relative shrink-0">
-                      <input
-                        ref={titleInputRef}
-                        type="text"
-                        value={activeNoteData.title}
-                        onChange={(e) => handleSaveNoteData(e.target.value, activeNoteData.body)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Tab' && !e.shiftKey) {
-                            e.preventDefault();
-                            textareaRef.current?.focus();
-                          }
-                        }}
-                        disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder={language === 'zh' ? "筆記標題（不加密，僅供搜尋）...." : "Note title (unencrypted, for search only)..."}
-                        className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
-                      />
-                    </div>
-
-                    {/* 📝 2. 下方機密內文框 */}
-                    <textarea
-                      ref={textareaRef}
-                      value={activeNoteData.body}
-                      onChange={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
-                      onBlur={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Tab' && e.shiftKey) {
-                          e.preventDefault();
-                          titleInputRef.current?.focus();
-                        }
-                      }}
-                      onClick={updateSelection}
-                      onKeyUp={updateSelection}
-                      onSelect={updateSelection}
-                      onPaste={handlePaste}
-                      disabled={activeNote.isEncrypted && !passphrase}
-                      placeholder={language === 'zh' ? "從這裡開始輸入機密內容（會隨設定加密，保護隱私）..." : "Enter your secret content here..."}
-                      className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
-                    />
-                  </div>
-                ) : (
-                  <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
-                    <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
-                      {activeNoteData.title || "Untitled Note"}
-                    </h1>
-
-                    <ReactMarkdown
-                      remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks]}
-                      rehypePlugins={[rehypeRaw]}
-                      components={{
-                        p: ({ node, children, ...props }) => {
-                          const rawText = Array.isArray(children) ? children.join('') : String(children || '');
-                          const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
-
-                          if (isAccountOrSecret) {
-                            const label = isAccountOrSecret[1];
-                            const value = isAccountOrSecret[2].trim();
-                            const keyId = `${activeNote.id}_${label}_${value}`;
-
-                            return (
-                              <div className="flex items-center justify-between gap-2 bg-neutral-900/90 border border-neutral-800 px-3 py-2 rounded-lg font-mono text-xs my-2 shadow-md max-w-lg">
-                                <div className="flex items-center gap-2 truncate flex-1">
-                                  <span className="text-emerald-400 font-semibold shrink-0">{label}:</span>
-                                  <span className="truncate text-neutral-200">{value}</span>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopySecureText(value, keyId)}
-                                  className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-all shrink-0 ${copiedKey === keyId
-                                    ? "bg-emerald-600 text-white font-bold"
-                                    : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700/60"
-                                    }`}
-                                  title="點擊複製（30秒後自動清空剪貼簿）"
-                                >
-                                  <img
-                                    src="/turtle.svg"
-                                    alt="Turtle Icon"
-                                    className={`w-3.5 h-3.5 object-contain transition-transform ${copiedKey === keyId ? "scale-125 rotate-12" : ""}`}
-                                  />
-                                  {copiedKey === keyId ? (
-                                    <>
-                                      <Check className="w-3 h-3 text-white" />
-                                      <span>已複製 (30s)</span>
-                                    </>
-                                  ) : (
-                                    <span>複製</span>
-                                  )}
-                                </button>
-                              </div>
-                            );
-                          }
-
-                          // ✅ 修正後的新版本（刪除 whitespace-pre-wrap）
-                          return <p className="mb-4 leading-relaxed break-words" {...props}>{children}</p>;
-                        },
-                        img: ({ node, ...props }) => (
-                          <img
-                            {...props}
-                            className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
-                            alt={props.alt || "Note Image"}
-                          />
-                        ),
-                        a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 break-all" />
-                        )
-                      }}
-                    >
-                      {activeNoteData.body}
-                    </ReactMarkdown>
-                  </div>
-                )}
-              </div>
-
-              {/* 隱藏 Inputs */}
-              <input type="file" ref={fileInputRef} onChange={handleImportMarkdown} accept=".md,.txt" className="hidden" />
-              <input type="file" ref={wordInputRef} onChange={handleImportWord} accept=".docx" className="hidden" />
-              <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
-              <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
-
-              {/* 左下角：烏龜2號 預覽/編輯模式切換鈕 */}
-              <div className="fixed bottom-6 left-6 z-20 md:left-80 flex items-center gap-2 group">
-                <button
-                  type="button"
-                  onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
-                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 relative"
-                  title={viewMode === 'edit' ? '點擊切換至預覽模式' : '點擊切換至編輯模式'}
-                >
-                  <img
-                    src="/turtle2.svg"
-                    alt="Turtle Mode Switcher"
-                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
-                      }`}
-                  />
-
-                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
-                    }`}>
-                    {viewMode === 'edit' ? '編' : '閱'}
-                  </span>
-                </button>
-
-                <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
-                  {viewMode === 'edit' ? '✏️ Edit ' : '👁️ Preview '}
-                </span>
-              </div>
-
-              {/* 右下角球型折疊工具箱 (位置移到 AI 上方，維持「向上展開」) */}
-              <div className="fixed bottom-24 right-6 z-20 flex flex-col items-end gap-2">
-                {isFabOpen && (
-                  <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
-                    >
-                      <span>Markdown</span>
-                      <FileCode className="w-4 h-4 text-emerald-400" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => wordInputRef.current?.click()}
-                      disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
-                    >
-                      <span>Word (.docx)</span>
-                      <Upload className="w-4 h-4 text-blue-400" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
-                    >
-                      <span>{language === 'zh' ? '相機' : 'Camera'}</span>
-                      <Camera className="w-4 h-4 text-emerald-400" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => imageInputRef.current?.click()}
-                      disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
-                    >
-                      <span>{language === 'zh' ? '圖片' : 'Picture'}</span>
-                      <ImageIcon className="w-4 h-4 text-emerald-400" />
-                    </button>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
-                    }`}
-                  title={language === 'zh' ? '工具箱' : 'Toolbox'}
-                >
-                  {isFabOpen ? (
-                    <div className="w-12 h-12 rounded-full bg-neutral-800/90 border border-neutral-700 flex items-center justify-center text-neutral-200 shadow-xl backdrop-blur-sm">
-                      <X className="w-6 h-6" />
-                    </div>
-                  ) : (
-                    <img
-                      src="/turtle1.svg"
-                      alt="Turtle Toolbox"
-                      className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
-                    />
-                  )}
-                </button>
-              </div>
-
-              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 (位置降到最下方) */}
-              <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end">
-                {isChatOpen && (
-                  <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-
-                    {/* Chat Header */}
-                    <div className="p-3.5 bg-neutral-950/90 border-b border-neutral-800 flex items-center justify-between shrink-0">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-                          <Bot className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-bold text-neutral-100 flex items-center gap-1.5">
-                            TurtleAI {language === 'zh' ? '助手' : 'Assistant'}
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
-                          </h3>
-                          <p className="text-[10px] text-neutral-400">
-                            {isAiEnabled
-                              ? (language === 'zh' ? "🟢 AI ON · 已開啟當前筆記感知" : "🟢 AI ON · Note context aware")
-                              : (language === 'zh' ? "🔴 AI OFF · 狀態保護中 (禁止傳送內容)" : "🔴 AI OFF · Privacy protected (No content sent)")}
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setIsChatOpen(false)}
-                        className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Chat 訊息內容區 */}
-                    <div ref={chatScrollRef} className="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs leading-relaxed">
-                      {chatMessages.map((msg, idx) => (
-                        <div
-                          key={idx}
-                          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${msg.role === 'user'
-                              ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
-                              : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
-                              }`}
+                          #{t}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(t)}
+                            className="hover:text-red-400 transition-colors"
                           >
-                            <div className="prose prose-invert max-w-none text-xs">
-                              <ReactMarkdown
-                                remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks]}
-                                rehypePlugins={[rehypeRaw]}>
-                                {msg.content}
-                              </ReactMarkdown>
-                            </div>
-                          </div>
-                        </div>
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
                       ))}
 
-                      {isAiThinking && (
-                        <div className="flex justify-start">
-                          <div className="bg-neutral-800/90 text-neutral-400 rounded-2xl rounded-bl-none px-3.5 py-2.5 border border-neutral-700/60 flex items-center gap-2">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                            <span>TurtleAI {language === 'zh' ? '思考中...' : 'is thinking...'}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Chat Footer 輸入框 */}
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSendAiMessage();
-                      }}
-                      className="p-3 bg-neutral-950/90 border-t border-neutral-800 flex items-center gap-2 shrink-0"
-                    >
-                      <input
-                        type="text"
-                        placeholder={isAiEnabled
-                          ? (language === 'zh' ? "詢問 AI 或輸入指令..." : "Ask AI or enter command...")
-                          : (language === 'zh' ? "🔒 AI 功能目前關閉中..." : "🔒 AI is currently disabled...")}
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        disabled={isAiThinking || !isAiEnabled}
-                        className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-neutral-200 focus:outline-none focus:border-indigo-500 placeholder-neutral-500 disabled:opacity-50"
-                      />
-                      <button
-                        type="submit"
-                        disabled={!inputMessage.trim() || isAiThinking || !isAiEnabled}
-                        className="p-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-xl transition-all disabled:opacity-40"
+                      {/* 自訂 Tag 輸入框 */}
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleAddTag(tagInput);
+                        }}
+                        className="inline-flex items-center"
                       >
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                    </form>
+                        <input
+                          type="text"
+                          placeholder="+ Tag..."
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
+                        />
+                      </form>
 
+                      {/* 分隔線 */}
+                      <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
+
+                      {/* 常用預設 Tag 按鈕 */}
+                      <button
+                        type="button"
+                        onClick={() => handleAddTag("Password")}
+                        className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                      >
+                        🔑 #Password
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddTag("AuthKey")}
+                        className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                      >
+                        ⚡ #AuthKey
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddTag("SSHKey")}
+                        className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                      >
+                        🛡️ #SSH_Key
+                      </button>
+                    </div>
                   </div>
                 )}
 
-                {/* 懸浮開關按鈕 */}
-                <button
-                  type="button"
-                  onClick={() => setIsChatOpen(!isChatOpen)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isChatOpen
-                    ? "bg-indigo-600 text-white scale-105"
-                    : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
-                    }`}
-                  title={language === 'zh' ? '開啟 TurtleAI 筆記助手' : 'Open TurtleAI Assistant'}
-                >
-                  <Bot className="w-6 h-6" />
-                </button>
-              </div>
+                {/* 👇 新增：動態折疊 Icon 快速選單 👇 */}
+                {isEmojiSectionOpen && (
+                  <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center gap-1.5 flex-wrap text-base">
+                      <span className="text-xs text-neutral-500 mr-1 font-bold">
+                        {language === 'zh' ? '段落圖示：' : 'Icons:'}
+                      </span>
+                      {/* 這裡面的圖示你可以隨意增減替換 */}
+                      {['🛡️', '💡', '📌', '⚠️', '✅', '❌', '🚀', '🎯', '📈', '📊', '📝', '🔧', '🔥', '⭐', '👉', '💬'].map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => insertFormatting(emoji + " ", "", "")}
+                          disabled={activeNote.isEncrypted && !passphrase}
+                          className="hover:bg-neutral-800 hover:scale-125 p-1.5 rounded-md transition-all flex items-center justify-center disabled:opacity-40"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                {/* 格式工具列 */}
+                <div className="flex items-center gap-1 p-1.5 bg-neutral-900/80 border border-neutral-800 rounded-lg text-neutral-300 overflow-x-auto shrink-0 scrollbar-none">
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("**", "**", language === 'zh' ? "粗體文字" : "Bold text")}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "粗體" : "Bold"}
+                  >
+                    <Bold className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("*", "*", language === 'zh' ? "斜體文字" : "Italic text")}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "斜體" : "Italic"}
+                  >
+                    <Italic className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("~~", "~~", language === 'zh' ? "刪除線文字" : "Strikethrough text")}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "刪除線" : "Strikethrough"}
+                  >
+                    <Strikethrough className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("<mark>", "</mark>", language === 'zh' ? "高亮文字" : "Highlighted text")}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-amber-300 rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "高亮" : "Highlight"}
+                  >
+                    <Highlighter className="w-4 h-4" />
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                  <div className="relative flex items-center shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => colorInputRef.current?.click()}
+                      disabled={activeNote.isEncrypted && !passphrase}
+                      className="p-1.5 hover:bg-neutral-800 rounded transition flex items-center gap-1 disabled:opacity-40"
+                      title={language === 'zh' ? "選取文字顏色" : "Text Color"}
+                    >
+                      <Palette className="w-4 h-4" style={{ color: textColor }} />
+                    </button>
+                    <input
+                      type="color"
+                      ref={colorInputRef}
+                      value={textColor}
+                      onChange={(e) => {
+                        setTextColor(e.target.value);
+                        insertFormatting(`<span style="color: ${e.target.value}">`, "</span>", language === 'zh' ? "彩色文字" : "Colored text");
+                      }}
+                      className="absolute opacity-0 w-0 h-0 pointer-events-none"
+                    />
+                  </div>
+
+                  <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', language === 'zh' ? '向左對齊內容' : 'Align left content')}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "向左對齊" : "Align Left"}
+                  >
+                    <AlignLeft className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting('\n<div align="center">\n', '\n</div>\n', language === 'zh' ? '置中對齊內容' : 'Align center content')}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "置中對齊" : "Align Center"}
+                  >
+                    <AlignCenter className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting('\n<div align="right">\n', '\n</div>\n', language === 'zh' ? '向右對齊內容' : 'Align right content')}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
+                    title={language === 'zh' ? "向右對齊" : "Align Right"}
+                  >
+                    <AlignRight className="w-4 h-4" />
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                  {/* 👇 新增：Icon 標籤動態折疊按鈕 👇 */}
+                  <button
+                    type="button"
+                    onClick={() => setIsEmojiSectionOpen(!isEmojiSectionOpen)}
+                    className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isEmojiSectionOpen
+                      ? "bg-indigo-950 border border-indigo-600 text-indigo-300"
+                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                      }`}
+                    title={isEmojiSectionOpen
+                      ? (language === 'zh' ? "點擊收合 Icon 面板" : "Click to collapse Icon panel")
+                      : (language === 'zh' ? "點擊展開 Icon 面板" : "Click to expand Icon panel")}
+                  >
+                    <Smile className="w-3.5 h-3.5" />
+                    <span>Icon</span>
+                    {isEmojiSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                  {/* 🏷️ Tag 標籤動態折疊按鈕 */}
+                  <button
+                    type="button"
+                    onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
+                    className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isTagSectionOpen
+                      ? "bg-emerald-950 border border-emerald-600 text-emerald-300"
+                      : (activeNote.tags && activeNote.tags.length > 0)
+                        ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
+                        : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                      }`}
+                    title={isTagSectionOpen
+                      ? (language === 'zh' ? "點擊收合 Tag 面板" : "Click to collapse Tag panel")
+                      : (language === 'zh' ? "點擊展開 Tag 面板" : "Click to expand Tag panel")}
+                  >
+                    <TagIcon className="w-3.5 h-3.5" />
+                    <span>
+                      Tag {activeNote.tags && activeNote.tags.length > 0 ? `(${activeNote.tags.length})` : ''}
+                    </span>
+                    {isTagSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
+                    disabled={activeNote.isEncrypted && !passphrase}
+                    className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
+                    title={language === 'zh' ? "插入結構化帳號密碼範本" : "Insert structured credential template"}
+                  >
+                    <Key className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Secret</span>
+                  </button>
+
+                  {/* 🛡️ AI 保密/啟用安全開關 */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAiEnabled(!isAiEnabled)}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 shadow-sm ${isAiEnabled
+                      ? "bg-emerald-600 text-white shadow-emerald-950/50"
+                      : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                      }`}
+                    title={isAiEnabled
+                      ? (language === 'zh' ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI Enabled: Decrypted note content can be analyzed by AI")
+                      : (language === 'zh' ? "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI" : "AI Disabled: Privacy protected, no notes sent to AI")}
+                  >
+                    <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
+                    <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
+                  </button>
+                </div>
+
+                {/* 編輯器 / 預覽器 切換顯示區域 */}
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  {viewMode === 'edit' ? (
+                    <div className="flex flex-col gap-3 min-h-full pb-30">
+
+                      {/* 🟠 1. 獨立橘框標題列 */}
+                      <div className="relative shrink-0">
+                        <input
+                          ref={titleInputRef}
+                          type="text"
+                          value={activeNoteData.title}
+                          onChange={(e) => handleSaveNoteData(e.target.value, activeNoteData.body)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Tab' && !e.shiftKey) {
+                              e.preventDefault();
+                              textareaRef.current?.focus();
+                            }
+                          }}
+                          disabled={activeNote.isEncrypted && !passphrase}
+                          placeholder={language === 'zh' ? "筆記標題（不加密，僅供搜尋）...." : "Note title (unencrypted, for search only)..."}
+                          className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
+                        />
+                      </div>
+
+                      {/* 📝 2. 下方機密內文框 */}
+                      <textarea
+                        ref={textareaRef}
+                        value={activeNoteData.body}
+                        onChange={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
+                        onBlur={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Tab' && e.shiftKey) {
+                            e.preventDefault();
+                            titleInputRef.current?.focus();
+                          }
+                        }}
+                        onClick={updateSelection}
+                        onKeyUp={updateSelection}
+                        onSelect={updateSelection}
+                        onPaste={handlePaste}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        placeholder={language === 'zh' ? "從這裡開始輸入機密內容（會隨設定加密，保護隱私）..." : "Enter your secret content here..."}
+                        className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
+                      />
+                    </div>
+                  ) : (
+                    <div className="prose prose-invert max-w-none pb-30 text-neutral-200">
+                      <h1 className="text-xl font-bold text-amber-400 border-b border-neutral-800 pb-2 mb-4">
+                        {activeNoteData.title || "Untitled Note"}
+                      </h1>
+
+                      <ReactMarkdown
+                        remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks]}
+                        rehypePlugins={[rehypeRaw]}
+                        components={{
+                          p: ({ node, children, ...props }) => {
+                            const rawText = Array.isArray(children) ? children.join('') : String(children || '');
+                            const isAccountOrSecret = /^(Account|Secret|Password|Key|Token):\s*(.+)/i.exec(rawText.trim());
+
+                            if (isAccountOrSecret) {
+                              const label = isAccountOrSecret[1];
+                              const value = isAccountOrSecret[2].trim();
+                              const keyId = `${activeNote.id}_${label}_${value}`;
+
+                              return (
+                                <div className="flex items-center justify-between gap-2 bg-neutral-900/90 border border-neutral-800 px-3 py-2 rounded-lg font-mono text-xs my-2 shadow-md max-w-lg">
+                                  <div className="flex items-center gap-2 truncate flex-1">
+                                    <span className="text-emerald-400 font-semibold shrink-0">{label}:</span>
+                                    <span className="truncate text-neutral-200">{value}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopySecureText(value, keyId)}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] flex items-center gap-1.5 transition-all shrink-0 ${copiedKey === keyId
+                                      ? "bg-emerald-600 text-white font-bold"
+                                      : "bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700/60"
+                                      }`}
+                                    title="點擊複製（30秒後自動清空剪貼簿）"
+                                  >
+                                    <img
+                                      src="/turtle.svg"
+                                      alt="Turtle Icon"
+                                      className={`w-3.5 h-3.5 object-contain transition-transform ${copiedKey === keyId ? "scale-125 rotate-12" : ""}`}
+                                    />
+                                    {copiedKey === keyId ? (
+                                      <>
+                                        <Check className="w-3 h-3 text-white" />
+                                        <span>已複製 (30s)</span>
+                                      </>
+                                    ) : (
+                                      <span>複製</span>
+                                    )}
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            // ✅ 修正後的新版本（刪除 whitespace-pre-wrap）
+                            return <p className="mb-4 leading-relaxed break-words" {...props}>{children}</p>;
+                          },
+                          img: ({ node, ...props }) => (
+                            <img
+                              {...props}
+                              className="max-w-full h-auto rounded-lg my-2 border border-neutral-800 shadow-md"
+                              alt={props.alt || "Note Image"}
+                            />
+                          ),
+                          a: ({ node, ...props }) => (
+                            <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300 break-all" />
+                          )
+                        }}
+                      >
+                        {activeNoteData.body}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+
+                {/* 隱藏 Inputs */}
+                <input type="file" ref={fileInputRef} onChange={handleImportMarkdown} accept=".md,.txt" className="hidden" />
+                <input type="file" ref={wordInputRef} onChange={handleImportWord} accept=".docx" className="hidden" />
+                <input type="file" ref={imageInputRef} onChange={handleInsertImage} accept="image/*" className="hidden" />
+                <input type="file" ref={cameraInputRef} onChange={handleInsertImage} accept="image/*" capture="environment" className="hidden" />
+
+                {/* 左下角：烏龜2號 預覽/編輯模式切換鈕 */}
+                <div className="fixed bottom-6 left-6 z-20 md:left-80 flex items-center gap-2 group">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
+                    className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 relative"
+                    title={viewMode === 'edit' ? '點擊切換至預覽模式' : '點擊切換至編輯模式'}
+                  >
+                    <img
+                      src="/turtle2.svg"
+                      alt="Turtle Mode Switcher"
+                      className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                        }`}
+                    />
+
+                    <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
+                      }`}>
+                      {viewMode === 'edit' ? '編' : '閱'}
+                    </span>
+                  </button>
+
+                  <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
+                    {viewMode === 'edit' ? '✏️ Edit ' : '👁️ Preview '}
+                  </span>
+                </div>
+
+                {/* 右下角球型折疊工具箱 (位置移到 AI 上方，維持「向上展開」) */}
+                <div className="fixed bottom-24 right-6 z-20 flex flex-col items-end gap-2">
+                  {isFabOpen && (
+                    <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      >
+                        <span>Markdown</span>
+                        <FileCode className="w-4 h-4 text-emerald-400" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => wordInputRef.current?.click()}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      >
+                        <span>Word (.docx)</span>
+                        <Upload className="w-4 h-4 text-blue-400" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      >
+                        <span>{language === 'zh' ? '相機' : 'Camera'}</span>
+                        <Camera className="w-4 h-4 text-emerald-400" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      >
+                        <span>{language === 'zh' ? '圖片' : 'Picture'}</span>
+                        <ImageIcon className="w-4 h-4 text-emerald-400" />
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsFabOpen(!isFabOpen)}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                      }`}
+                    title={language === 'zh' ? '工具箱' : 'Toolbox'}
+                  >
+                    {isFabOpen ? (
+                      <div className="w-12 h-12 rounded-full bg-neutral-800/90 border border-neutral-700 flex items-center justify-center text-neutral-200 shadow-xl backdrop-blur-sm">
+                        <X className="w-6 h-6" />
+                      </div>
+                    ) : (
+                      <img
+                        src="/turtle1.svg"
+                        alt="Turtle Toolbox"
+                        className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                      />
+                    )}
+                  </button>
+                </div>
+
+                {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 (位置降到最下方) */}
+                <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end">
+                  {isChatOpen && (
+                    <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+
+                      {/* Chat Header */}
+                      <div className="p-3.5 bg-neutral-950/90 border-b border-neutral-800 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                            <Bot className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="text-xs font-bold text-neutral-100 flex items-center gap-1.5">
+                              TurtleAI {language === 'zh' ? '助手' : 'Assistant'}
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
+                            </h3>
+                            <p className="text-[10px] text-neutral-400">
+                              {isAiEnabled
+                                ? (language === 'zh' ? "🟢 AI ON · 已開啟當前筆記感知" : "🟢 AI ON · Note context aware")
+                                : (language === 'zh' ? "🔴 AI OFF · 狀態保護中 (禁止傳送內容)" : "🔴 AI OFF · Privacy protected (No content sent)")}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setIsChatOpen(false)}
+                          className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Chat 訊息內容區 */}
+                      <div ref={chatScrollRef} className="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs leading-relaxed">
+                        {chatMessages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 ${msg.role === 'user'
+                                ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
+                                : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
+                                }`}
+                            >
+                              <div className="prose prose-invert max-w-none text-xs">
+                                <ReactMarkdown
+                                  remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks]}
+                                  rehypePlugins={[rehypeRaw]}>
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {isAiThinking && (
+                          <div className="flex justify-start">
+                            <div className="bg-neutral-800/90 text-neutral-400 rounded-2xl rounded-bl-none px-3.5 py-2.5 border border-neutral-700/60 flex items-center gap-2">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                              <span>TurtleAI {language === 'zh' ? '思考中...' : 'is thinking...'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chat Footer 輸入框 */}
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleSendAiMessage();
+                        }}
+                        className="p-3 bg-neutral-950/90 border-t border-neutral-800 flex items-center gap-2 shrink-0"
+                      >
+                        <input
+                          type="text"
+                          placeholder={isAiEnabled
+                            ? (language === 'zh' ? "詢問 AI 或輸入指令..." : "Ask AI or enter command...")
+                            : (language === 'zh' ? "🔒 AI 功能目前關閉中..." : "🔒 AI is currently disabled...")}
+                          value={inputMessage}
+                          onChange={(e) => setInputMessage(e.target.value)}
+                          disabled={isAiThinking || !isAiEnabled}
+                          className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-neutral-200 focus:outline-none focus:border-indigo-500 placeholder-neutral-500 disabled:opacity-50"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!inputMessage.trim() || isAiThinking || !isAiEnabled}
+                          className="p-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-xl transition-all disabled:opacity-40"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                        </button>
+                      </form>
+
+                    </div>
+                  )}
+
+                  {/* 懸浮開關按鈕 */}
+                  <button
+                    type="button"
+                    onClick={() => setIsChatOpen(!isChatOpen)}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isChatOpen
+                      ? "bg-indigo-600 text-white scale-105"
+                      : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
+                      }`}
+                    title={language === 'zh' ? '開啟 TurtleAI 筆記助手' : 'Open TurtleAI Assistant'}
+                  >
+                    <Bot className="w-6 h-6" />
+                  </button>
+                </div>
+
+              </div>
+            </>
+            ) : (
+            <div className="flex-1 flex items-center justify-center text-neutral-600 text-sm">
+              請選擇或建立一份筆記
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-neutral-600 text-sm">
-            請選擇或建立一份筆記
-          </div>
         )}
-      </main>
+          </main>
     </div>
   );
 }
