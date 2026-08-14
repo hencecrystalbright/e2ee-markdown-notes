@@ -1335,7 +1335,7 @@ function NoteApp() {
                       disabled={activeNote.isEncrypted && !passphrase}
                       className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
-                      <span>title={language === 'zh' ? '相機' : 'Camera'}</span>
+                      <span>{language === 'zh' ? '相機' : 'Camera'}</span>
                       <Camera className="w-4 h-4 text-emerald-400" />
                     </button>
 
@@ -1345,7 +1345,7 @@ function NoteApp() {
                       disabled={activeNote.isEncrypted && !passphrase}
                       className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
                     >
-                      <span>Picture</span>
+                      <span>{language === 'zh' ? '圖片' : 'Picture'}</span>
                       <ImageIcon className="w-4 h-4 text-emerald-400" />
                     </button>
                   </div>
