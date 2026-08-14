@@ -1012,7 +1012,7 @@ function NoteApp() {
                   onClick={() => insertFormatting("**", "**", "粗體文字")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="粗體"
+                  title="粗體": "Bold"
                 >
                   <Bold className="w-4 h-4" />
                 </button>
