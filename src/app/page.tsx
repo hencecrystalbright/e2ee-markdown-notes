@@ -813,8 +813,7 @@ function NoteApp() {
             )}
           </button>
         </div>
-          </button>
-        </div>
+          
 
       </aside>
 
