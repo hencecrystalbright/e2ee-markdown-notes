@@ -1155,7 +1155,7 @@ function NoteApp() {
                   <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
                 </button>
               </div>
-              
+
               {/* 編輯器 / 預覽器 切換顯示區域 */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {viewMode === 'edit' ? (
@@ -1472,7 +1472,7 @@ function NoteApp() {
                     ? "bg-indigo-600 text-white scale-105"
                     : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
                     }`}
-                  title="開啟 TurtleAI 筆記助手"
+                  title=" Turtle AI "
                 >
                   <Bot className="w-6 h-6" />
                 </button>
