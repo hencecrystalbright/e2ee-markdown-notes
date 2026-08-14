@@ -9,7 +9,6 @@ import {
   Unlock,
   Trash2,
   Search,
-  ShieldAlert,
   KeyRound,
   Eye,
   EyeOff,
@@ -39,12 +38,10 @@ import {
   Sliders,
   Power,
   Tag as TagIcon,
-  Copy,
   Check,
   Key,
   ChevronDown,
-  ChevronUp,
-  Settings, // 👈 新增左下設定
+  ChevronUp
 } from "lucide-react";
 
 // 加解密與工具
@@ -90,8 +87,8 @@ function NoteApp() {
   // RWD 與工具箱 State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [language, setLanguage] = useState<'zh' | 'en'>('zh'); // 👈 新增：控制語言狀態
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [language, setLanguage] = useState<'zh' | 'en'>('zh'); // 系統語言切換
 
   // 🏷️ Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
@@ -157,7 +154,7 @@ function NoteApp() {
 
   const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
 
-  // 拆分標題與內文 Helper (無值時維持空字串)
+  // 拆分標題與內文 Helper
   const getNoteTitleAndBody = (note?: Note) => {
     if (!note) return { title: "", body: "" };
     if (!note.isEncrypted) {
@@ -178,7 +175,7 @@ function NoteApp() {
     return { title, body };
   };
 
-  // 建立新筆記 (標題純空字串)
+  // 建立新筆記
   const handleCreateNote = async () => {
     const newNoteData = {
       title: "",
@@ -245,7 +242,7 @@ function NoteApp() {
     }
   };
 
-  // --- Tag 新增與移除邏輯 ---
+  // Tag 新增與移除邏輯
   const handleAddTag = (tagToAdd: string) => {
     if (!activeNote) return;
     const cleanTag = tagToAdd.trim().replace(/^#/, "");
@@ -268,7 +265,7 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-  // 🛡️ 一鍵複製與 30 秒自動清空剪貼簿機制
+  // 一鍵複製與 30 秒自動清空剪貼簿機制
   const handleCopySecureText = (text: string, keyIdentifier: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(keyIdentifier);
@@ -336,7 +333,7 @@ function NoteApp() {
     }
   };
 
-  // --- 發送 AI 訊息 ---
+  // 發送 AI 訊息
   const handleSendAiMessage = async (overridePrompt?: string) => {
     if (!isAiEnabled) {
       alert("⚠️ AI 功能目前處於【關閉/保密狀態】。請先點擊工具列右側的『 AI 開關 』圖示以啟用。");
@@ -391,32 +388,30 @@ function NoteApp() {
         end: textareaRef.current.selectionEnd,
       };
     }
-  };// 處理自動縮網址的貼上攔截
+  };
+
+  // 處理自動縮網址的貼上攔截
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const pastedText = e.clipboardData.getData('text');
     const url = pastedText.trim();
 
-    // 嚴格判斷：只攔截「純網址」且長度超過 30 個字元才縮網址，避免干擾普通文字貼上
     if (/^https?:\/\/[^\s]+$/.test(url) && url.length > 30) {
-      e.preventDefault(); // 攔截瀏覽器預設的貼上動作
+      e.preventDefault();
 
       const loadingMark = `[⏳ 產生短網址中...]`;
-      insertFormatting(loadingMark, "", ""); // 先在游標處顯示佔位符，讓畫面不卡頓
+      insertFormatting(loadingMark, "", ""); 
 
       try {
-        // 呼叫 TinyURL API (免金鑰、永久有效)
         const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-        const shortUrl = res.ok ? await res.text() : url; // 成功給短網址，失敗退回長網址
+        const shortUrl = res.ok ? await res.text() : url; 
 
-        // 讀取當前最新的編輯器內容並無縫替換
         if (textareaRef.current) {
           const currentBody = textareaRef.current.value;
           const newBody = currentBody.replace(loadingMark, shortUrl);
           const { title } = getNoteTitleAndBody(activeNote);
-          handleSaveNoteData(title, newBody); // 觸發你原本的儲存與加密邏輯
+          handleSaveNoteData(title, newBody); 
         }
       } catch (error) {
-        // 遇到網路錯誤，安全退回原始長網址
         if (textareaRef.current) {
           const currentBody = textareaRef.current.value;
           const newBody = currentBody.replace(loadingMark, url);
@@ -645,12 +640,12 @@ function NoteApp() {
           <div className="space-y-1">
             <label className="text-[11px] text-neutral-400 flex items-center gap-1">
               <KeyRound className="w-3 h-3 text-emerald-400" />
-              主加密金鑰 (Passphrase)
+              {language === 'zh' ? '主加密金鑰 (Passphrase)' : 'Passphrase'}
             </label>
             <div className="relative">
               <input
                 type={showPassphrase ? "text" : "password"}
-                placeholder="輸入解密/加密密碼..."
+                placeholder={language === 'zh' ? "輸入解密/加密密碼..." : "Enter passphrase..."}
                 value={passphrase}
                 onChange={(e) => setPassphrase(e.target.value)}
                 className="w-full pl-3 pr-8 py-1.5 text-xs bg-neutral-950 border border-neutral-700 rounded-md focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-500"
@@ -668,7 +663,7 @@ function NoteApp() {
           <div className="relative">
             <input
               type="text"
-              placeholder="搜尋筆記..."
+              placeholder={language === 'zh' ? "搜尋筆記..." : "Search notes..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 text-xs bg-neutral-950 border border-neutral-800 rounded-md focus:outline-none focus:border-neutral-600 text-neutral-200 placeholder-neutral-500"
@@ -686,7 +681,7 @@ function NoteApp() {
                   : "bg-neutral-950 text-neutral-400 hover:text-neutral-200"
                   }`}
               >
-                全部
+                {language === 'zh' ? '全部' : 'All'}
               </button>
               {allTags.map((tag) => (
                 <button
@@ -758,16 +753,11 @@ function NoteApp() {
                 <div className="flex items-center justify-between text-[11px] text-neutral-500">
                   <span>{note.updatedAt}</span>
                   <span className="truncate max-w-[100px] font-mono text-[10px]">
-                    {note.isEncrypted ? "AES-256 加密中" : note.content.slice(0, 15)}
+                    {note.isEncrypted ? (language === 'zh' ? "AES-256 加密中" : "AES-256 Encrypted") : note.content.slice(0, 15)}
                   </span>
                 </div>
-
               </div>
-
             ))}
-        </div>
-
-        {/* ...上面是筆記清單的 </div> ... */}
         </div>
 
         {/* 👇 全新重構：專業版左下角設定與浮出選單 👇 */}
@@ -821,11 +811,7 @@ function NoteApp() {
             )}
           </button>
         </div>
-
-      </aside> {/* 這是側邊欄的結尾 */}
-
-
-      {/* 主編輯區域 */}
+      </aside>
 
       {/* 主編輯區域 */}
       <main className="flex-1 flex flex-col h-full bg-neutral-950 min-w-0">
@@ -850,7 +836,7 @@ function NoteApp() {
               <div className={`flex items-center gap-1 overflow-x-auto scrollbar-none py-1 border-l border-r border-neutral-800/80 px-2 transition-opacity ${!isAiEnabled ? "opacity-30 pointer-events-none" : "opacity-100"
                 }`}>
                 <button
-                  onClick={() => handleSendAiMessage("請幫我提煉這篇筆記的核心重點與摘要。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請幫我提煉這篇筆記的核心重點與摘要。" : "Please summarize the core points of this note.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-indigo-950/80 border border-indigo-500/60 text-indigo-400 hover:bg-indigo-900/80 transition-all shrink-0 active:scale-95 disabled:opacity-40"
                   title="Summary"
@@ -859,7 +845,7 @@ function NoteApp() {
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請用通俗易懂、簡潔白話的語言重新表達這篇筆記。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請用通俗易懂、簡潔白話的語言重新表達這篇筆記。" : "Please rephrase this note in simple, easy-to-understand language.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-emerald-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
                   title="Simple"
@@ -868,7 +854,7 @@ function NoteApp() {
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請把這篇筆記轉化為商務、嚴謹、專業的報告口吻。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請把這篇筆記轉化為商務、嚴謹、專業的報告口吻。" : "Please convert this note into a professional, formal business report tone.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-amber-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
                   title="Pro"
@@ -877,7 +863,7 @@ function NoteApp() {
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請將這篇筆記內容流暢翻譯為英文版本，並保持原本的 Markdown 格式。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請將這篇筆記內容流暢翻譯為英文版本，並保持原本的 Markdown 格式。" : "Please translate this note fluently into English while preserving the Markdown formatting.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-blue-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
                   title="ENG"
@@ -886,7 +872,7 @@ function NoteApp() {
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請將這篇筆記內文拆解為結構清晰的大綱架構 (Headings & Bullets)。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請將這篇筆記內文拆解為結構清晰的大綱架構 (Headings & Bullets)。" : "Please break this note down into a clear outline structure.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-purple-400 hover:bg-neutral-800 hover:border-neutral-700 transition-all shrink-0 active:scale-95 disabled:opacity-40"
                   title="Outline"
@@ -895,19 +881,19 @@ function NoteApp() {
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請幫我檢查這篇筆記的錯別字與語法流暢度。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請幫我檢查這篇筆記的錯別字與語法流暢度。" : "Please check this note for typos and grammatical fluency.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all shrink-0 active:scale-95 disabled:opacity-40"
-                  title="Edited 1"
+                  title="Check"
                 >
                   <Sliders className="w-4 h-4" />
                 </button>
 
                 <button
-                  onClick={() => handleSendAiMessage("請幫我提出根據這篇筆記可執行的後續行動與建議。")}
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請幫我提出根據這篇筆記可執行的後續行動與建議。" : "Please suggest actionable next steps based on this note.")}
                   disabled={isAiThinking || !isAiEnabled}
                   className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all shrink-0 active:scale-95 disabled:opacity-40"
-                  title="Edited 2"
+                  title="Action Steps"
                 >
                   <Sliders className="w-4 h-4" />
                 </button>
@@ -925,12 +911,12 @@ function NoteApp() {
                   {activeNote.isEncrypted ? (
                     <>
                       <Lock className="w-3.5 h-3.5" />
-                      <span className="hidden lg:inline">已加密</span>
+                      <span className="hidden lg:inline">{language === 'zh' ? '已加密' : 'Encrypted'}</span>
                     </>
                   ) : (
                     <>
                       <Unlock className="w-3.5 h-3.5" />
-                      <span className="hidden lg:inline">未加密</span>
+                      <span className="hidden lg:inline">{language === 'zh' ? '未加密' : 'Unencrypted'}</span>
                     </>
                   )}
                 </button>
@@ -990,7 +976,7 @@ function NoteApp() {
                     {/* 分隔線 */}
                     <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
 
-                    {/* 常用預設 Tag 按鈕（直接排列在右側） */}
+                    {/* 常用預設 Tag 按鈕 */}
                     <button
                       type="button"
                       onClick={() => handleAddTag("Password")}
@@ -1148,7 +1134,7 @@ function NoteApp() {
                   title="插入結構化帳號密碼範本"
                 >
                   <Key className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sercet</span>
+                  <span>Secret</span>
                 </button>
 
                 {/* 🛡️ AI 保密/啟用安全開關 */}
@@ -1185,7 +1171,7 @@ function NoteApp() {
                           }
                         }}
                         disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder="筆記標題（不加密，僅供搜尋）...Title (no encryption)."
+                        placeholder={language === 'zh' ? "筆記標題（不加密，僅供搜尋）...Title (no encryption)." : "Note title (unencrypted, for search only)..."}
                         className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
                       />
                     </div>
@@ -1205,9 +1191,9 @@ function NoteApp() {
                       onClick={updateSelection}
                       onKeyUp={updateSelection}
                       onSelect={updateSelection}
-                      onPaste={handlePaste} // 👈 加上這行，綁定剛寫好的網址攔截器
+                      onPaste={handlePaste}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      placeholder="從這裡開始輸入機密內容（會隨設定加密，保護隱私）...The following is protected by AES-256 encryption."
+                      placeholder={language === 'zh' ? "從這裡開始輸入機密內容（會隨設定加密，保護隱私）..." : "Enter your secret content here..."}
                       className="flex-1 w-full bg-transparent resize-none focus:outline-none text-neutral-200 font-mono text-sm leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-neutral-600 min-h-[350px]"
                     />
                   </div>
@@ -1263,11 +1249,7 @@ function NoteApp() {
                             );
                           }
 
-                          return (
-                            <p className="my-4 leading-relaxed" {...props}>
-                              {children}
-                            </p>
-                          );
+                          return <p className="mb-4 leading-relaxed break-words whitespace-pre-wrap" {...props}>{children}</p>;
                         },
                         img: ({ node, ...props }) => (
                           <img
