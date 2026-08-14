@@ -399,17 +399,17 @@ function NoteApp() {
       e.preventDefault();
 
       const loadingMark = `[⏳ 產生短網址中...]`;
-      insertFormatting(loadingMark, "", ""); 
+      insertFormatting(loadingMark, "", "");
 
       try {
         const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-        const shortUrl = res.ok ? await res.text() : url; 
+        const shortUrl = res.ok ? await res.text() : url;
 
         if (textareaRef.current) {
           const currentBody = textareaRef.current.value;
           const newBody = currentBody.replace(loadingMark, shortUrl);
           const { title } = getNoteTitleAndBody(activeNote);
-          handleSaveNoteData(title, newBody); 
+          handleSaveNoteData(title, newBody);
         }
       } catch (error) {
         if (textareaRef.current) {
@@ -762,11 +762,11 @@ function NoteApp() {
 
         {/* 👇 全新重構：專業版左下角設定與浮出選單 👇 */}
         <div className="relative mt-auto border-t border-neutral-800 bg-neutral-900 shrink-0">
-          
+
           {/* 浮出選單 (Pop-up Menu) */}
           {isSettingsOpen && (
             <div className="absolute bottom-[100%] left-0 w-full bg-neutral-900 border-t border-neutral-800 p-2.5 flex flex-col gap-2 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
-              
+
               {/* 語言切換按鈕 */}
               <button
                 onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
@@ -794,16 +794,16 @@ function NoteApp() {
           >
             <div className="flex items-center gap-3">
               {/* 🎯 鎖死尺寸 w-6 h-6，保證魚絕對不會變大 */}
-              <img 
-                src="/fish1.svg" 
-                alt="Settings" 
-                className="w-6 h-6 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
+              <img
+                src="/fish1.svg"
+                alt="Settings"
+                className="w-6 h-6 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
               />
               <span className="text-sm font-medium text-neutral-200">
                 {language === 'zh' ? 'SETUP' : 'Setup'}
               </span>
             </div>
-            
+
             {isSettingsOpen ? (
               <ChevronDown className="w-4 h-4 text-neutral-500" />
             ) : (
@@ -1009,40 +1009,40 @@ function NoteApp() {
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting("**", "**", "粗體文字")}
+                  onClick={() => insertFormatting("**", "**", language === 'zh' ? "粗體文字" : "Bold text")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="粗體": "Bold"
+                  title={language === 'zh' ? "粗體" : "Bold"}
                 >
                   <Bold className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting("*", "*", "斜體文字")}
+                  onClick={() => insertFormatting("*", "*", language === 'zh' ? "斜體文字" : "Italic text")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="斜體"
+                  title={language === 'zh' ? "斜體" : "Italic"}
                 >
                   <Italic className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting("~~", "~~", "刪除線文字")}
+                  onClick={() => insertFormatting("~~", "~~", language === 'zh' ? "刪除線文字" : "Strikethrough text")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="刪除線"
+                  title={language === 'zh' ? "刪除線" : "Strikethrough"}
                 >
                   <Strikethrough className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting("<mark>", "</mark>", "高亮文字")}
+                  onClick={() => insertFormatting("<mark>", "</mark>", language === 'zh' ? "高亮文字" : "Highlighted text")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-amber-300 rounded transition disabled:opacity-40 shrink-0"
-                  title="高亮"
+                  title={language === 'zh' ? "高亮" : "Highlight"}
                 >
                   <Highlighter className="w-4 h-4" />
                 </button>
@@ -1055,7 +1055,7 @@ function NoteApp() {
                     onClick={() => colorInputRef.current?.click()}
                     disabled={activeNote.isEncrypted && !passphrase}
                     className="p-1.5 hover:bg-neutral-800 rounded transition flex items-center gap-1 disabled:opacity-40"
-                    title="選取文字顏色"
+                    title={language === 'zh' ? "選取文字顏色" : "Text Color"}
                   >
                     <Palette className="w-4 h-4" style={{ color: textColor }} />
                   </button>
@@ -1065,7 +1065,7 @@ function NoteApp() {
                     value={textColor}
                     onChange={(e) => {
                       setTextColor(e.target.value);
-                      insertFormatting(`<span style="color: ${e.target.value}">`, "</span>", "彩色文字");
+                      insertFormatting(`<span style="color: ${e.target.value}">`, "</span>", language === 'zh' ? "彩色文字" : "Colored text");
                     }}
                     className="absolute opacity-0 w-0 h-0 pointer-events-none"
                   />
@@ -1075,30 +1075,30 @@ function NoteApp() {
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', '向左對齊內容')}
+                  onClick={() => insertFormatting('\n<div align="left">\n', '\n</div>\n', language === 'zh' ? '向左對齊內容' : 'Align left content')}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="向左對齊"
+                  title={language === 'zh' ? "向左對齊" : "Align Left"}
                 >
                   <AlignLeft className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting('\n<div align="center">\n', '\n</div>\n', '置中對齊內容')}
+                  onClick={() => insertFormatting('\n<div align="center">\n', '\n</div>\n', language === 'zh' ? '置中對齊內容' : 'Align center content')}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="置中對齊"
+                  title={language === 'zh' ? "置中對齊" : "Align Center"}
                 >
                   <AlignCenter className="w-4 h-4" />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => insertFormatting('\n<div align="right">\n', '\n</div>\n', '向右對齊內容')}
+                  onClick={() => insertFormatting('\n<div align="right">\n', '\n</div>\n', language === 'zh' ? '向右對齊內容' : 'Align right content')}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="p-1.5 hover:bg-neutral-800 hover:text-white rounded transition disabled:opacity-40 shrink-0"
-                  title="向右對齊"
+                  title={language === 'zh' ? "向右對齊" : "Align Right"}
                 >
                   <AlignRight className="w-4 h-4" />
                 </button>
@@ -1115,7 +1115,9 @@ function NoteApp() {
                       ? "bg-neutral-800 text-emerald-400 border border-emerald-500/40"
                       : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
                     }`}
-                  title={isTagSectionOpen ? "點擊收合 Tag 面板" : "點擊展開 Tag 面板"}
+                  title={isTagSectionOpen
+                    ? (language === 'zh' ? "點擊收合 Tag 面板" : "Click to collapse Tag panel")
+                    : (language === 'zh' ? "點擊展開 Tag 面板" : "Click to expand Tag panel")}
                 >
                   <TagIcon className="w-3.5 h-3.5" />
                   <span>
@@ -1131,7 +1133,7 @@ function NoteApp() {
                   onClick={() => insertFormatting("\n\nURL: \n\nAccount: ", "\n\nSecret: \n\n", "")}
                   disabled={activeNote.isEncrypted && !passphrase}
                   className="px-2 py-1 bg-amber-950/80 border border-amber-600/80 text-amber-300 hover:bg-amber-900/80 rounded transition flex items-center gap-1 text-xs shrink-0 font-medium disabled:opacity-40"
-                  title="插入結構化帳號密碼範本"
+                  title={language === 'zh' ? "插入結構化帳號密碼範本" : "Insert structured credential template"}
                 >
                   <Key className="w-3.5 h-3.5 text-amber-400" />
                   <span>Secret</span>
@@ -1145,13 +1147,15 @@ function NoteApp() {
                     ? "bg-emerald-600 text-white shadow-emerald-950/50"
                     : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
                     }`}
-                  title={isAiEnabled ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI"}
+                  title={isAiEnabled
+                    ? (language === 'zh' ? "AI 功能【已啟用】：筆記解密內文可供 AI 提問分析" : "AI Enabled: Decrypted note content can be analyzed by AI")
+                    : (language === 'zh' ? "AI 功能【已關閉】：保護機密，禁止任何筆記傳送至 AI" : "AI Disabled: Privacy protected, no notes sent to AI")}
                 >
                   <Power className={`w-3.5 h-3.5 ${isAiEnabled ? "text-white" : "text-neutral-500"}`} />
                   <span>AI {isAiEnabled ? "ON" : "OFF"}</span>
                 </button>
               </div>
-
+              
               {/* 編輯器 / 預覽器 切換顯示區域 */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {viewMode === 'edit' ? (
