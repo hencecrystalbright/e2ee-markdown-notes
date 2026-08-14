@@ -800,7 +800,7 @@ function NoteApp() {
                 className="w-6 h-6 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
               />
               <span className="text-sm font-medium text-neutral-200">
-                {language === 'zh' ? 'SETUP' : 'System Setup'}
+                {language === 'zh' ? 'SETUP' : 'Setup'}
               </span>
             </div>
             
@@ -1171,7 +1171,7 @@ function NoteApp() {
                           }
                         }}
                         disabled={activeNote.isEncrypted && !passphrase}
-                        placeholder={language === 'zh' ? "筆記標題（不加密，僅供搜尋）...Title (no encryption)." : "Note title (unencrypted, for search only)..."}
+                        placeholder={language === 'zh' ? "筆記標題（不加密，僅供搜尋）...." : "Note title (unencrypted, for search only)..."}
                         className="w-full px-3 py-2 bg-neutral-900/80 border-2 border-amber-500/80 rounded-lg text-amber-300 font-mono text-sm font-semibold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 placeholder:text-amber-500/50 transition-all disabled:opacity-50"
                       />
                     </div>
@@ -1290,14 +1290,14 @@ function NoteApp() {
                       }`}
                   />
 
-                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
+                  <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-md border border-neutral-900 ${viewMode === 'edit' ? 'bg-emerald-500' : 'bg-blue-500'
                     }`}>
                     {viewMode === 'edit' ? '編' : '閱'}
                   </span>
                 </button>
 
                 <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
-                  {viewMode === 'edit' ? '✏️ 編輯中 ' : '👁️ 預覽中 '}
+                  {viewMode === 'edit' ? '✏️ Edit ' : '👁️ Preview '}
                 </span>
               </div>
 
