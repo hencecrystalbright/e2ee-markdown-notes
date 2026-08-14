@@ -1,0 +1,32 @@
+{
+  "name": "TurtleNote",
+  "short_name": "TurtleNote",
+  "description": "Personal Encrypted Workspace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/turtle.svg",//這裡是PWA的icon，建議使用svg，因為svg可以縮放不失真
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",//如果讀取不到svg，會使用這個icon，建議使用png，因為png可以支援透明背景
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",//如果讀取不到svg，會使用這個icon，建議使用png，因為png可以支援透明背景
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
