@@ -44,6 +44,7 @@ import {
   Key,
   ChevronDown,
   ChevronUp
+  Settings // 👈 新增左下設定
 } from "lucide-react";
 
 // 加解密與工具
@@ -608,17 +609,9 @@ function NoteApp() {
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
 
-          {/* 側邊欄 Header：登出鈕位於最左邊 */}
+          {/* 側邊欄 Header：乾淨的 Logo 區 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
-              <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
-                title="登出帳號"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-
               <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
               <span>TurtleNote</span>
             </div>
@@ -766,10 +759,44 @@ function NoteApp() {
                     {note.isEncrypted ? "AES-256 加密中" : note.content.slice(0, 15)}
                   </span>
                 </div>
+                
               </div>
+              
             ))}
         </div>
+
+        {/* 👇 新增：側邊欄左下角的設定與登出區塊 👇 */}
+        <div className="p-3 border-t border-neutral-800 bg-neutral-950/40 flex items-center justify-between shrink-0">
+          {/* 左側：設定與語言 */}
+          <div className="flex items-center gap-1.5">
+            <button
+              className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded-md transition-colors"
+              title="設定"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+            <button
+              className="px-2 py-1 border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded text-[10px] font-bold transition-colors"
+              title="語言切換 (開發中)"
+            >
+              中 / EN
+            </button>
+          </div>
+
+          {/* 右側：登出按鈕 */}
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors text-xs font-medium"
+            title="登出帳號"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>登出</span>
+          </button>
+        </div>
+
       </aside>
+
+      {/* 主編輯區域 */}
 
       {/* 主編輯區域 */}
       <main className="flex-1 flex flex-col h-full bg-neutral-950 min-w-0">
