@@ -759,9 +759,9 @@ function NoteApp() {
                     {note.isEncrypted ? "AES-256 加密中" : note.content.slice(0, 15)}
                   </span>
                 </div>
-                
+
               </div>
-              
+
             ))}
         </div>
 
@@ -774,12 +774,11 @@ function NoteApp() {
               title="設定"
             >
               <img
-                    src="/fish1.svg"
-                    alt="Turtle Mode Switcher"
-                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
-                      }`}
-                  />
-              <Settings className="w-4 h-4" />
+                src="/fish1.svg"
+                alt="setup Mode"
+                className={`w-5 h-5 object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                  }`}
+              />
             </button>
             <button
               className="px-2 py-1 border border-neutral-700 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded text-[10px] font-bold transition-colors"
