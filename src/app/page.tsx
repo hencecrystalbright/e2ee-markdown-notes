@@ -1305,15 +1305,15 @@ function NoteApp() {
                 </span>
               </div>
 
-              {/* 右下角球型折疊工具箱 */}
-              <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2">
+              {/* 右下角球型折疊工具箱 (位置在最下方不變，改為「向左展開」) */}
+              <div className="fixed bottom-6 right-6 z-20 flex items-center justify-end">
                 {isFabOpen && (
-                  <div className="flex flex-col items-end gap-2 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+                  <div className="flex items-center gap-2 mr-3 animate-in fade-in slide-in-from-right-5 duration-200">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
                     >
                       <span>Markdown</span>
                       <FileCode className="w-4 h-4 text-emerald-400" />
@@ -1323,7 +1323,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => wordInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
                     >
                       <span>Word (.docx)</span>
                       <Upload className="w-4 h-4 text-blue-400" />
@@ -1333,7 +1333,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
                     >
                       <span>{language === 'zh' ? '相機' : 'Camera'}</span>
                       <Camera className="w-4 h-4 text-emerald-400" />
@@ -1343,7 +1343,7 @@ function NoteApp() {
                       type="button"
                       onClick={() => imageInputRef.current?.click()}
                       disabled={activeNote.isEncrypted && !passphrase}
-                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-full shadow-lg text-xs transition-transform active:scale-95 disabled:opacity-50 whitespace-nowrap"
                     >
                       <span>{language === 'zh' ? '圖片' : 'Picture'}</span>
                       <ImageIcon className="w-4 h-4 text-emerald-400" />
@@ -1354,9 +1354,9 @@ function NoteApp() {
                 <button
                   type="button"
                   onClick={() => setIsFabOpen(!isFabOpen)}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
+                  className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 ${isFabOpen ? "scale-110 rotate-12" : "hover:scale-105"
                     }`}
-                  title={language === 'zh' ? '工具箱' : 'Tools'}
+                  title={language === 'zh' ? '工具箱' : 'Toolbox'}
                 >
                   {isFabOpen ? (
                     <div className="w-12 h-12 rounded-full bg-neutral-800/90 border border-neutral-700 flex items-center justify-center text-neutral-200 shadow-xl backdrop-blur-sm">
@@ -1372,7 +1372,7 @@ function NoteApp() {
                 </button>
               </div>
 
-              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 */}
+              {/* 🤖 右側懸浮 AI Chatbox 按鈕與彈出對話視窗 (位置在上方不變) */}
               <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end">
                 {isChatOpen && (
                   <div className="fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-0 sm:mb-3 w-full sm:w-96 h-full sm:h-[500px] bg-neutral-950/95 sm:bg-neutral-900/95 border-0 sm:border border-indigo-500/30 rounded-none sm:rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -1385,11 +1385,13 @@ function NoteApp() {
                         </div>
                         <div>
                           <h3 className="text-xs font-bold text-neutral-100 flex items-center gap-1.5">
-                            {language === 'zh' ? 'Turtle AI ' : 'Turtle AI'}
+                            TurtleAI {language === 'zh' ? '助手' : 'Assistant'}
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">DeepSeek</span>
                           </h3>
                           <p className="text-[10px] text-neutral-400">
-                            {isAiEnabled ? "🟢 AI ON · 已開啟當前筆記感知" : "🔴 AI OFF · 狀態保護中 (禁止傳送內容)"}
+                            {isAiEnabled 
+                              ? (language === 'zh' ? "🟢 AI ON · 已開啟當前筆記感知" : "🟢 AI ON · Note context aware") 
+                              : (language === 'zh' ? "🔴 AI OFF · 狀態保護中 (禁止傳送內容)" : "🔴 AI OFF · Privacy protected (No content sent)")}
                           </p>
                         </div>
                       </div>
@@ -1430,7 +1432,7 @@ function NoteApp() {
                         <div className="flex justify-start">
                           <div className="bg-neutral-800/90 text-neutral-400 rounded-2xl rounded-bl-none px-3.5 py-2.5 border border-neutral-700/60 flex items-center gap-2">
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                            <span>TurtleAI 思考中...</span>
+                            <span>TurtleAI {language === 'zh' ? '思考中...' : 'is thinking...'}</span>
                           </div>
                         </div>
                       )}
@@ -1446,7 +1448,9 @@ function NoteApp() {
                     >
                       <input
                         type="text"
-                        placeholder={isAiEnabled ? "詢問 AI 或輸入指令..." : "🔒 AI 功能目前關閉中..."}
+                        placeholder={isAiEnabled 
+                          ? (language === 'zh' ? "詢問 AI 或輸入指令..." : "Ask AI or enter command...") 
+                          : (language === 'zh' ? "🔒 AI 功能目前關閉中..." : "🔒 AI is currently disabled...")}
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         disabled={isAiThinking || !isAiEnabled}
@@ -1472,7 +1476,7 @@ function NoteApp() {
                     ? "bg-indigo-600 text-white scale-105"
                     : "bg-indigo-950/90 border border-indigo-500/50 text-indigo-400 hover:scale-110 active:scale-95"
                     }`}
-                  title=" Turtle AI "
+                  title={language === 'zh' ? '開啟 TurtleAI 筆記助手' : 'Open TurtleAI Assistant'}
                 >
                   <Bot className="w-6 h-6" />
                 </button>
