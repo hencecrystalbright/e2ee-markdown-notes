@@ -773,6 +773,12 @@ function NoteApp() {
               className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded-md transition-colors"
               title="設定"
             >
+              <img
+                    src="/fish1.svg"
+                    alt="Turtle Mode Switcher"
+                    className={`w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 ${viewMode === 'preview' ? 'scale-105 rotate-6' : ''
+                      }`}
+                  />
               <Settings className="w-4 h-4" />
             </button>
             <button
@@ -1286,7 +1292,7 @@ function NoteApp() {
                 </button>
 
                 <span className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-300 text-xs font-medium shadow-xl backdrop-blur-md opacity-80 group-hover:opacity-100 transition-opacity">
-                  {viewMode === 'edit' ? '✏️ 編輯中 (點烏龜預覽)' : '👁️ 預覽中 (點烏龜編輯)'}
+                  {viewMode === 'edit' ? '✏️ 編輯中 ' : '👁️ 預覽中 '}
                 </span>
               </div>
 
