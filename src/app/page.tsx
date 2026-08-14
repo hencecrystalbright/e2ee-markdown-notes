@@ -43,8 +43,8 @@ import {
   Check,
   Key,
   ChevronDown,
-  ChevronUp
-  Settings // 👈 新增左下設定
+  ChevronUp,
+  Settings, // 👈 新增左下設定
 } from "lucide-react";
 
 // 加解密與工具
