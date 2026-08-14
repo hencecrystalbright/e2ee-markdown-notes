@@ -92,6 +92,7 @@ function NoteApp() {
 
   // 🏷️ Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
+  const [isEmojiSectionOpen, setIsEmojiSectionOpen] = useState(false); // 👈 新增：控制 Icon 面板開關
   const [tagInput, setTagInput] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -935,73 +936,97 @@ function NoteApp() {
 
               {/* 🏷️ 動態折疊 Tag 標籤控制列（單行整合版） */}
               {isTagSectionOpen && (
+                {/* ... 上面是原本的 isTagSectionOpen 區塊 ... */ }
+              
+              {/* 👇 新增：動態折疊 Icon 快速選單 👇 */}
+              {isEmojiSectionOpen && (
                 <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                    <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-
-                    {/* 已掛上的 Tag */}
-                    {activeNote?.tags?.map((t) => (
-                      <span
-                        key={t}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
+                  <div className="flex items-center gap-1.5 flex-wrap text-base">
+                    <span className="text-xs text-neutral-500 mr-1 font-bold">
+                      {language === 'zh' ? '段落圖示：' : 'Icons:'}
+                    </span>
+                    {/* 這裡面的圖示你可以隨意增減替換 */}
+                    {['🛡️', '💡', '📌', '⚠️', '✅', '❌', '🚀', '🎯', '📈', '📊', '📝', '🔧', '🔥', '⭐', '👉', '💬'].map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => insertFormatting(emoji + " ", "", "")}
+                        disabled={activeNote.isEncrypted && !passphrase}
+                        className="hover:bg-neutral-800 hover:scale-125 p-1.5 rounded-md transition-all flex items-center justify-center disabled:opacity-40"
                       >
-                        #{t}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(t)}
-                          className="hover:text-red-400 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
+                        {emoji}
+                      </button>
                     ))}
-
-                    {/* 自訂 Tag 輸入框 */}
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleAddTag(tagInput);
-                      }}
-                      className="inline-flex items-center"
-                    >
-                      <input
-                        type="text"
-                        placeholder="+ Tag..."
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
-                      />
-                    </form>
-
-                    {/* 分隔線 */}
-                    <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
-
-                    {/* 常用預設 Tag 按鈕 */}
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("Password")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      🔑 #Password
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("AuthKey")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      ⚡ #AuthKey
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleAddTag("SSHKey")}
-                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
-                    >
-                      🛡️ #SSH_Key
-                    </button>
                   </div>
                 </div>
+              )}
+              <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                  <TagIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+
+                  {/* 已掛上的 Tag */}
+                  {activeNote?.tags?.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700/60 text-emerald-300 text-[11px] font-mono"
+                    >
+                      #{t}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(t)}
+                        className="hover:text-red-400 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* 自訂 Tag 輸入框 */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleAddTag(tagInput);
+                    }}
+                    className="inline-flex items-center"
+                  >
+                    <input
+                      type="text"
+                      placeholder="+ Tag..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      className="bg-neutral-950 border border-neutral-800 rounded-md px-2 py-0.5 text-[11px] text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
+                    />
+                  </form>
+
+                  {/* 分隔線 */}
+                  <div className="w-[1px] h-3.5 bg-neutral-800 mx-0.5 shrink-0" />
+
+                  {/* 常用預設 Tag 按鈕 */}
+                  <button
+                    type="button"
+                    onClick={() => handleAddTag("Password")}
+                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                  >
+                    🔑 #Password
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddTag("AuthKey")}
+                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                  >
+                    ⚡ #AuthKey
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddTag("SSHKey")}
+                    className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors shrink-0 text-[11px]"
+                  >
+                    🛡️ #SSH_Key
+                  </button>
+                </div>
+              </div>
               )}
 
               {/* 格式工具列 */}
@@ -1104,7 +1129,25 @@ function NoteApp() {
                 </button>
 
                 <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
+                
+                {/* 👇 新增：Icon 標籤動態折疊按鈕 👇 */}
+                <button
+                  type="button"
+                  onClick={() => setIsEmojiSectionOpen(!isEmojiSectionOpen)}
+                  className={`px-2 py-1 rounded-md transition-all flex items-center gap-1 text-xs shrink-0 font-medium ${isEmojiSectionOpen
+                    ? "bg-indigo-950 border border-indigo-600 text-indigo-300"
+                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    }`}
+                  title={isEmojiSectionOpen
+                    ? (language === 'zh' ? "點擊收合 Icon 面板" : "Click to collapse Icon panel")
+                    : (language === 'zh' ? "點擊展開 Icon 面板" : "Click to expand Icon panel")}
+                >
+                  <Smile className="w-3.5 h-3.5" />
+                  <span>Icon</span>
+                  {isEmojiSectionOpen ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
+                </button>
 
+                <div className="w-[1px] h-4 bg-neutral-800 mx-1 shrink-0" />
                 {/* 🏷️ Tag 標籤動態折疊按鈕 */}
                 <button
                   type="button"
