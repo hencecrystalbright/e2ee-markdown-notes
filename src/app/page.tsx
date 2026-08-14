@@ -800,7 +800,7 @@ function NoteApp() {
                 className="w-6 h-6 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" 
               />
               <span className="text-sm font-medium text-neutral-200">
-                {language === 'zh' ? '系統設定' : 'System Setup'}
+                {language === 'zh' ? 'SETUP' : 'System Setup'}
               </span>
             </div>
             
