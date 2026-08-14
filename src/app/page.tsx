@@ -933,9 +933,7 @@ function NoteApp() {
             </header>
 
             <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-
-              <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3 relative">
-
+            
                 {/* 🏷️ 動態折疊 Tag 標籤控制列（單行整合版） */}
                 {isTagSectionOpen && (
                   <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
