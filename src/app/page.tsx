@@ -1010,7 +1010,7 @@ function NoteApp() {
                   <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-lg shrink-0 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center gap-1.5 flex-wrap text-base">
                       <span className="text-xs text-neutral-500 mr-1 font-bold">
-                        {language === 'zh' ? '段落圖示：' : 'Icons:'}
+                        {language === 'zh' ? '圖示：' : 'Icons:'}
                       </span>
                       {/* 這裡面的圖示你可以隨意增減替換 */}
                       {['🛡️', '💡', '📌', '⚠️', '✅', '❌', '🚀', '🎯', '📈', '📊', '📝', '🔧', '🔥', '⭐', '👉', '💬'].map((emoji) => (
