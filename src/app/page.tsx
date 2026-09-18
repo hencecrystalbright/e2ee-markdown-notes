@@ -90,9 +90,8 @@ function NoteApp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [language, setLanguage] = useState<'zh' | 'en'>('zh'); // 系統語言切換
 
-  // 🏷️ Tag & Emoji 控制列動態折疊 State
+  // 🏷️ Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
-  const [isEmojiSectionOpen, setIsEmojiSectionOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -489,7 +488,6 @@ function NoteApp() {
     setIsFabOpen(false);
   };
 
-  // 🖼️ 圖片壓縮與 ImgBB 上傳邏輯（已完美替換）
   const handleInsertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !activeNote) return;
@@ -548,13 +546,11 @@ function NoteApp() {
         reader.readAsDataURL(file);
       });
 
-      // ✅ 換成 ImgBB 穩定免驗證 API (請將下方填入您的 API Key)
-      const IMGBB_API_KEY = "貼上你剛剛複製的_IMGBB_API_KEY";
-
       const formData = new FormData();
-      formData.append('image', compressedBlob);
+      formData.append('image', compressedBlob, `${file.name.split('.')[0]}.jpg`);
 
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      const imgbbKey = '16ea7f74ac471604d9c319efef2cda0e';
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
         method: 'POST',
         body: formData,
       });
@@ -572,8 +568,7 @@ function NoteApp() {
 
         handleSaveNoteData(title, newBody);
       } else {
-        console.error("ImgBB 報錯:", data);
-        alert(`圖片上傳失敗: ${data.error?.message || '請確認 API Key 是否正確'}`);
+        alert("圖片上傳失敗，請稍後再試！");
       }
     } catch (error) {
       console.error("圖片壓縮/上傳失敗:", error);
@@ -609,7 +604,7 @@ function NoteApp() {
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
 
-          {/* 側邊欄 Header */}
+          {/* 側邊欄 Header：乾淨的 Logo 區 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
               <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
@@ -763,10 +758,14 @@ function NoteApp() {
             ))}
         </div>
 
-        {/* 左下角設定與彈出選單 */}
+        {/* 👇 全新重構：專業版左下角設定與浮出選單 👇 */}
         <div className="relative mt-auto border-t border-neutral-800 bg-neutral-900 shrink-0">
+
+          {/* 浮出選單 (Pop-up Menu) */}
           {isSettingsOpen && (
-            <div className="absolute bottom-[100%] left-0 w-full bg-neutral-900 border-t border-neutral-800 p-2.5 flex flex-col gap-2 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] z-50">
+            <div className="absolute bottom-[100%] left-0 w-full bg-neutral-900 border-t border-neutral-800 p-2.5 flex flex-col gap-2 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+
+              {/* 語言切換按鈕 */}
               <button
                 onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
                 className="flex items-center justify-center w-full py-2 border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-md text-xs font-bold transition-colors shadow-sm"
@@ -774,6 +773,7 @@ function NoteApp() {
                 {language === 'zh' ? '🌐 切換至英文 (English)' : '🌐 Switch to Chinese'}
               </button>
 
+              {/* 登出按鈕 */}
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="flex items-center justify-center gap-2 w-full py-2 rounded-md text-red-400 border border-red-900/30 hover:text-white hover:bg-red-600 transition-colors text-xs font-medium shadow-sm"
@@ -784,12 +784,14 @@ function NoteApp() {
             </div>
           )}
 
+          {/* 固定在底部的觸發按鈕 (鎖死魚的尺寸) */}
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
             className="w-full p-3.5 flex items-center justify-between hover:bg-neutral-800 transition-colors outline-none"
             title={language === 'zh' ? '系統設定' : 'Settings'}
           >
             <div className="flex items-center gap-3">
+              {/* 🎯 鎖死尺寸 w-6 h-6，保證魚絕對不會變大 */}
               <img
                 src="/fish1.svg"
                 alt="Settings"
@@ -810,7 +812,7 @@ function NoteApp() {
       </aside>
 
       {/* 主編輯區域 */}
-      <main className="flex-1 flex flex-col h-full bg-neutral-950 min-w-0 relative">
+      <main className="flex-1 flex flex-col h-full bg-neutral-950 min-w-0">
         {activeNote ? (
           <>
             <header className="h-14 border-b border-neutral-800 px-4 flex items-center justify-between bg-neutral-900/30 shrink-0 gap-2">
@@ -875,404 +877,20 @@ function NoteApp() {
                 >
                   <ListTree className="w-4 h-4" />
                 </button>
-              </div>
-
-              {/* 頂部操作按鈕區 */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={toggleEncryption}
-                  className={`p-2 rounded-lg border transition-all ${activeNote.isEncrypted
-                    ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-400"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
-                    }`}
-                  title={activeNote.isEncrypted ? "已加密 (點擊解密)" : "未加密 (點擊加密)"}
-                >
-                  {activeNote.isEncrypted ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                </button>
 
                 <button
-                  onClick={() => handleDeleteNote(activeNote.id)}
-                  className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
-                  title="刪除筆記"
+                  onClick={() => handleSendAiMessage(language === 'zh' ? "請幫我檢查這篇筆記的錯別字與語法流暢度。" : "Please check this note for typos and grammatical fluency.")}
+                  disabled={isAiThinking || !isAiEnabled}
+                  className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all shrink-0 active:scale-95 disabled:opacity-40"
+                  title="Check"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Sliders className="w-4 h-4" />
                 </button>
               </div>
             </header>
-
-            {/* 🛠️ 工具列 ToolBar */}
-            <div className="bg-neutral-900/60 border-b border-neutral-800 p-2 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none shrink-0">
-              <div className="flex items-center gap-1 shrink-0">
-                {/* 模式切換按鈕 */}
-                <button
-                  onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
-                  className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === 'preview'
-                    ? "bg-emerald-600 text-white"
-                    : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-                    }`}
-                >
-                  {viewMode === 'edit' ? "Preview" : "Edit"}
-                </button>
-
-                <div className="h-4 w-[1px] bg-neutral-800 mx-1" />
-
-                <button
-                  onClick={() => insertFormatting("**", "**", "粗體")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="粗體"
-                >
-                  <Bold className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => insertFormatting("*", "*", "斜體")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="斜體"
-                >
-                  <Italic className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => insertFormatting("~~", "~~", "刪除線")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="刪除線"
-                >
-                  <Strikethrough className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => insertFormatting("== ", " ==", "螢光筆")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="螢光黃底"
-                >
-                  <Highlighter className="w-4 h-4" />
-                </button>
-
-                <div className="h-4 w-[1px] bg-neutral-800 mx-1" />
-
-                <button
-                  onClick={() => insertFormatting("<span style='color:red;'>", "</span>", "紅字")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-red-400 hover:text-red-300"
-                  title="紅字"
-                >
-                  <Palette className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => insertFormatting("<div align='left'>\n", "\n</div>", "靠左內容")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="靠左對齊"
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => insertFormatting("<div align='center'>\n", "\n</div>", "居中內容")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="置中對齊"
-                >
-                  <AlignCenter className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => insertFormatting("<div align='right'>\n", "\n</div>", "靠右內容")}
-                  className="p-1.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  title="靠右對齊"
-                >
-                  <AlignRight className="w-4 h-4" />
-                </button>
-
-                <div className="h-4 w-[1px] bg-neutral-800 mx-1" />
-
-                <button
-                  onClick={() => setIsTagSectionOpen(!isTagSectionOpen)}
-                  className={`p-1.5 rounded transition-colors ${isTagSectionOpen ? "bg-emerald-950 text-emerald-400" : "hover:bg-neutral-800 text-neutral-400"}`}
-                  title="標籤管理"
-                >
-                  <TagIcon className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => setIsEmojiSectionOpen(!isEmojiSectionOpen)}
-                  className={`p-1.5 rounded transition-colors ${isEmojiSectionOpen ? "bg-amber-950 text-amber-400" : "hover:bg-neutral-800 text-neutral-400"}`}
-                  title="插入 Icon/Emoji"
-                >
-                  <Smile className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* 右側 AI 保密開關與聊天按鈕 */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setIsAiEnabled(!isAiEnabled)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${isAiEnabled
-                    ? "bg-emerald-950/80 border-emerald-500/60 text-emerald-400"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300"
-                    }`}
-                  title={isAiEnabled ? "AI 已連線" : "AI 已關閉 (保密中)"}
-                >
-                  <Power className="w-3.5 h-3.5" />
-                  <span>{isAiEnabled ? "AI ON" : "AI OFF"}</span>
-                </button>
-
-                <button
-                  onClick={() => setIsChatOpen(!isChatOpen)}
-                  className={`p-1.5 rounded-lg border transition-colors ${isChatOpen ? "bg-indigo-950 border-indigo-500 text-indigo-400" : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
-                    }`}
-                  title="AI 對話助理"
-                >
-                  <Bot className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* 🏷️ 折疊的 Tag 標籤輸入列 */}
-            {isTagSectionOpen && (
-              <div className="bg-neutral-900 border-b border-neutral-800 p-2.5 flex items-center gap-2 flex-wrap text-xs shrink-0 animate-in fade-in duration-200">
-                <span className="text-neutral-400 font-medium flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5 text-emerald-400" />
-                  標籤:
-                </span>
-                {activeNote.tags?.map((t) => (
-                  <span key={t} className="px-2 py-0.5 rounded bg-neutral-950 border border-neutral-800 text-emerald-400 font-mono flex items-center gap-1">
-                    #{t}
-                    <button onClick={() => handleRemoveTag(t)} className="hover:text-red-400 ml-1">×</button>
-                  </span>
-                ))}
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    placeholder="新增標籤..."
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddTag(tagInput);
-                      }
-                    }}
-                    className="bg-neutral-950 border border-neutral-800 rounded px-2 py-0.5 text-xs text-neutral-200 focus:outline-none focus:border-emerald-500 w-24"
-                  />
-                  <button
-                    onClick={() => handleAddTag(tagInput)}
-                    className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded text-xs"
-                  >
-                    新增
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 😃 折疊的 Icon/Emoji 選單 */}
-            {isEmojiSectionOpen && (
-              <div className="bg-neutral-900 border-b border-neutral-800 p-2 flex items-center gap-2 flex-wrap text-base shrink-0 animate-in fade-in duration-200">
-                {['🐢', '🔐', '📌', '💡', '⚠️', '✅', '🚀', '⭐', '📝', '🔥', '🎯', '❤️'].map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => insertFormatting(emoji, "", "")}
-                    className="p-1 hover:bg-neutral-800 rounded transition-transform active:scale-125"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* 編輯器與預覽主體 */}
-            <div className="flex-1 flex flex-col p-4 overflow-hidden gap-4">
-              <input
-                ref={titleInputRef}
-                type="text"
-                placeholder="筆記標題..."
-                value={activeNoteData.title}
-                onChange={(e) => handleSaveNoteData(e.target.value, activeNoteData.body)}
-                className="w-full text-xl font-bold bg-transparent border-b border-neutral-800 pb-2 focus:outline-none focus:border-emerald-500 text-neutral-100 placeholder-neutral-600"
-              />
-
-              <div className="flex-1 flex flex-col relative min-h-0">
-                {viewMode === 'edit' ? (
-                  <textarea
-                    ref={textareaRef}
-                    value={activeNoteData.body}
-                    onChange={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
-                    onSelect={updateSelection}
-                    onKeyUp={updateSelection}
-                    onClick={updateSelection}
-                    onPaste={handlePaste}
-                    placeholder="在此輸入筆記內容 (支援 Markdown 語法)..."
-                    className="w-full h-full bg-transparent resize-none focus:outline-none font-mono text-sm leading-relaxed text-neutral-300 placeholder-neutral-600 overflow-y-auto"
-                  />
-                ) : (
-                  <div className="w-full h-full overflow-y-auto prose prose-invert max-w-none font-sans text-neutral-300 leading-relaxed">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkBreaks]}
-                      rehypePlugins={[rehypeRaw]}
-                    >
-                      {activeNoteData.body}
-                    </ReactMarkdown>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 側邊 AI 對話面板 (Slide-over Drawer) */}
-            {isChatOpen && (
-              <div className="absolute top-14 right-0 bottom-0 w-80 sm:w-96 bg-neutral-900/95 backdrop-blur-md border-l border-neutral-800 z-20 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
-                <div className="p-3 border-b border-neutral-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-medium text-xs text-neutral-200">
-                    <Bot className="w-4 h-4 text-indigo-400" />
-                    <span>TurtleAI 助理</span>
-                  </div>
-                  <button
-                    onClick={() => setIsChatOpen(false)}
-                    className="p-1 rounded hover:bg-neutral-800 text-neutral-400"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* 對話訊息區 */}
-                <div ref={chatScrollRef} className="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
-                  {chatMessages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                      <div
-                        className={`max-w-[85%] p-2.5 rounded-lg leading-relaxed ${msg.role === 'user'
-                          ? 'bg-emerald-600 text-white rounded-br-none'
-                          : 'bg-neutral-800 text-neutral-200 border border-neutral-700/80 rounded-bl-none'
-                          }`}
-                      >
-                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-                          {msg.content}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  ))}
-
-                  {isAiThinking && (
-                    <div className="flex items-center gap-2 text-neutral-500 text-xs italic">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                      <span>AI 正在思考並整理中...</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 對話輸入框 */}
-                <div className="p-2.5 border-t border-neutral-800 bg-neutral-950 flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder={isAiEnabled ? "詢問 AI 關於這篇筆記..." : "請先在頂部開啟 AI 開關..."}
-                    disabled={!isAiEnabled || isAiThinking}
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSendAiMessage();
-                      }
-                    }}
-                    className="flex-1 bg-neutral-900 border border-neutral-800 rounded-md px-2.5 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
-                  />
-                  <button
-                    onClick={() => handleSendAiMessage()}
-                    disabled={!isAiEnabled || isAiThinking || !inputMessage.trim()}
-                    className="p-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 text-white rounded-md transition-colors"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 右下角 Floating Action Button (FAB) 選單 */}
-            <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
-              {isFabOpen && (
-                <div className="flex flex-col gap-2 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 px-3 py-2 rounded-lg text-xs shadow-lg hover:bg-neutral-800"
-                  >
-                    <FileCode className="w-4 h-4 text-emerald-400" />
-                    匯入 Markdown (.md)
-                  </button>
-
-                  <button
-                    onClick={() => wordInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 px-3 py-2 rounded-lg text-xs shadow-lg hover:bg-neutral-800"
-                  >
-                    <FileText className="w-4 h-4 text-blue-400" />
-                    匯入 Word (.docx)
-                  </button>
-
-                  <button
-                    onClick={() => imageInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 px-3 py-2 rounded-lg text-xs shadow-lg hover:bg-neutral-800"
-                  >
-                    <ImageIcon className="w-4 h-4 text-amber-400" />
-                    插入圖片 (ImgBB)
-                  </button>
-
-                  <button
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 px-3 py-2 rounded-lg text-xs shadow-lg hover:bg-neutral-800"
-                  >
-                    <Camera className="w-4 h-4 text-purple-400" />
-                    拍照上傳
-                  </button>
-                </div>
-              )}
-
-              <button
-                onClick={() => setIsFabOpen(!isFabOpen)}
-                className={`p-3.5 rounded-full text-white shadow-xl transition-all ${isFabOpen ? "bg-neutral-800 rotate-45" : "bg-emerald-600 hover:bg-emerald-500"
-                  }`}
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
           </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-neutral-600 font-mono text-sm">
-            請選取或建立一份筆記開始編輯 🐢
-          </div>
-        )}
+        ) : null}
       </main>
-
-      {/* 隱藏的檔案上傳 Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".md,.txt"
-        className="hidden"
-        onChange={handleImportMarkdown}
-      />
-      <input
-        ref={wordInputRef}
-        type="file"
-        accept=".docx"
-        className="hidden"
-        onChange={handleImportWord}
-      />
-      <input
-        ref={imageInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleInsertImage}
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleInsertImage}
-      />
     </div>
-  );
-}
-
-export default function Page() {
-  return (
-    <SessionProvider>
-      <NoteApp />
-    </SessionProvider>
   );
 }
