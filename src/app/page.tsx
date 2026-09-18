@@ -1528,8 +1528,41 @@ function NoteApp() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-neutral-600 text-sm">
-            請選擇或建立一份筆記
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-neutral-500 gap-4">
+            <div className="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-1">
+              <img src="/turtle.svg" alt="Turtle" className="w-8 h-8 opacity-60" />
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-neutral-300">
+                {language === 'zh' ? '目前沒有筆記' : 'No notes yet'}
+              </p>
+              <p className="text-xs text-neutral-500">
+                {language === 'zh' ? '立即建立你的第一篇加密筆記吧！' : 'Create your first encrypted note!'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 mt-2">
+              {/* 手機版開啟清單按鈕 */}
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(true)}
+                className="px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-300 text-xs font-medium hover:bg-neutral-800 transition-all flex items-center gap-1.5"
+              >
+                <Menu className="w-4 h-4" />
+                <span>{language === 'zh' ? '筆記選單' : 'Menu'}</span>
+              </button>
+
+              {/* 立即新增筆記按鈕 */}
+              <button
+                type="button"
+                onClick={handleCreateNote}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-all shadow-lg shadow-emerald-950/40 flex items-center gap-1.5 active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{language === 'zh' ? '建立筆記' : 'New Note'}</span>
+              </button>
+            </div>
           </div>
         )}
       </main>
