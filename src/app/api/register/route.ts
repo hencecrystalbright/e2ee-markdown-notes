@@ -57,12 +57,35 @@ export async function POST(request: Request) {
     // 3. 密碼鹽值哈希 (bcrypt 加密)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. 建立新使用者
+    // 4. 建立新使用者並附帶預設範例筆記
+    const welcomeLines = [
+      '歡迎來到你的專屬筆記空間！這是一份自動建立的生活導覽，你可以隨意修改或刪除。',
+      '',
+      '### 🛒 待辦清單範例（點擊可直接打勾）',
+      '- [x] 成功註冊 TurtleNote',
+      '- [ ] 買牛奶與雞蛋',
+      '- [ ] 週末行李打包清單',
+      '',
+      '### 💡 專屬安全鎖功能',
+      '這是一篇一般筆記。若想記錄信用卡卡號、存摺帳號或私密備忘：',
+      '1. 點擊頂部的「Secret / 鎖頭」按鈕。',
+      '2. 輸入一組你自己的密碼，內容就會在裝置本地完成加密。',
+      '',
+      '> 提示：點擊右上角「+」即可開始建立你的全新筆記！'
+    ];
+
     const newUser = await prisma.user.create({
       data: {
         email: account,
         password: hashedPassword,
-        name: account, // 名字直接預設為帳號名稱
+        name: account,
+        notes: {
+          create: {
+            title: '🛒 歡迎使用 TurtleNote！快速導覽',
+            content: welcomeLines.join('\n'),
+            isEncrypted: false,
+          },
+        },
       },
     });
 
