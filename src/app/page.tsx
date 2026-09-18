@@ -71,7 +71,7 @@ interface ChatMessage {
   content: string;
 }
 
-function NoteApp() {
+export default function NoteApp() {
   const { data: session, status } = useSession();
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string>("");
@@ -88,9 +88,9 @@ function NoteApp() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [language, setLanguage] = useState<'zh' | 'en'>('zh'); // 系統語言切換
+  const [language, setLanguage] = useState<'zh' | 'en'>('zh');
 
-  // 🏷️ Tag 控制列動態折疊 State
+  // Tag 控制列動態折疊 State
   const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -265,17 +265,6 @@ function NoteApp() {
     handleSaveNoteData(title, body, newTags);
   };
 
-  // 一鍵複製與 30 秒自動清空剪貼簿機制
-  const handleCopySecureText = (text: string, keyIdentifier: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(keyIdentifier);
-
-    setTimeout(() => {
-      navigator.clipboard.writeText("");
-      setCopiedKey(null);
-    }, 30000);
-  };
-
   const toggleEncryption = async () => {
     if (!activeNote) return;
 
@@ -381,47 +370,6 @@ function NoteApp() {
     }
   };
 
-  const updateSelection = () => {
-    if (textareaRef.current) {
-      lastSelectionRef.current = {
-        start: textareaRef.current.selectionStart,
-        end: textareaRef.current.selectionEnd,
-      };
-    }
-  };
-
-  // 處理自動縮網址的貼上攔截
-  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const pastedText = e.clipboardData.getData('text');
-    const url = pastedText.trim();
-
-    if (/^https?:\/\/[^\s]+$/.test(url) && url.length > 30) {
-      e.preventDefault();
-
-      const loadingMark = `[⏳ 產生短網址中...]`;
-      insertFormatting(loadingMark, "", "");
-
-      try {
-        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-        const shortUrl = res.ok ? await res.text() : url;
-
-        if (textareaRef.current) {
-          const currentBody = textareaRef.current.value;
-          const newBody = currentBody.replace(loadingMark, shortUrl);
-          const { title } = getNoteTitleAndBody(activeNote);
-          handleSaveNoteData(title, newBody);
-        }
-      } catch (error) {
-        if (textareaRef.current) {
-          const currentBody = textareaRef.current.value;
-          const newBody = currentBody.replace(loadingMark, url);
-          const { title } = getNoteTitleAndBody(activeNote);
-          handleSaveNoteData(title, newBody);
-        }
-      }
-    }
-  };
-
   const insertFormatting = (prefix: string, suffix: string = "", defaultText: string = "") => {
     if (!textareaRef.current || !activeNote) return;
 
@@ -447,45 +395,6 @@ function NoteApp() {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
       lastSelectionRef.current = { start: newCursorPos, end: newCursorPos };
     }, 0);
-  };
-
-  const handleImportMarkdown = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeNote) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const importedText = event.target?.result as string;
-      insertFormatting(`\n${importedText}\n`, "", "");
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-    setIsFabOpen(false);
-  };
-
-  const handleImportWord = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeNote) return;
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.convertToHtml({ arrayBuffer });
-      const html = result.value;
-
-      const turndownService = new TurndownService({
-        headingStyle: 'atx',
-        codeBlockStyle: 'fenced'
-      });
-      const markdown = turndownService.turndown(html);
-
-      insertFormatting(`\n${markdown}\n`, "", "");
-    } catch (error) {
-      console.error("Word 檔案解析失敗:", error);
-      alert("解析 Word 檔案失敗，請確保這是標準的 .docx 格式檔案。");
-    }
-
-    e.target.value = '';
-    setIsFabOpen(false);
   };
 
   const handleInsertImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -587,7 +496,6 @@ function NoteApp() {
 
   return (
     <div className="flex h-screen w-screen bg-neutral-950 text-neutral-100 overflow-hidden font-sans relative">
-
       {/* 手機版遮罩 Overlay */}
       {isSidebarOpen && (
         <div
@@ -603,8 +511,6 @@ function NoteApp() {
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}>
         <div className="p-4 border-b border-neutral-800 space-y-3">
-
-          {/* 側邊欄 Header：乾淨的 Logo 區 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-lg text-neutral-100">
               <img src="/turtle.svg" alt="Turtle Logo" className="w-6 h-6 object-contain" />
@@ -669,7 +575,6 @@ function NoteApp() {
             <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 top-2.5" />
           </div>
 
-          {/* 🏷️ 側邊欄 Tag 標籤動態過濾膠囊 */}
           {allTags.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
               <button
@@ -758,14 +663,9 @@ function NoteApp() {
             ))}
         </div>
 
-        {/* 👇 全新重構：專業版左下角設定與浮出選單 👇 */}
         <div className="relative mt-auto border-t border-neutral-800 bg-neutral-900 shrink-0">
-
-          {/* 浮出選單 (Pop-up Menu) */}
           {isSettingsOpen && (
             <div className="absolute bottom-[100%] left-0 w-full bg-neutral-900 border-t border-neutral-800 p-2.5 flex flex-col gap-2 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
-
-              {/* 語言切換按鈕 */}
               <button
                 onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
                 className="flex items-center justify-center w-full py-2 border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-md text-xs font-bold transition-colors shadow-sm"
@@ -773,7 +673,6 @@ function NoteApp() {
                 {language === 'zh' ? '🌐 切換至英文 (English)' : '🌐 Switch to Chinese'}
               </button>
 
-              {/* 登出按鈕 */}
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="flex items-center justify-center gap-2 w-full py-2 rounded-md text-red-400 border border-red-900/30 hover:text-white hover:bg-red-600 transition-colors text-xs font-medium shadow-sm"
@@ -784,14 +683,12 @@ function NoteApp() {
             </div>
           )}
 
-          {/* 固定在底部的觸發按鈕 (鎖死魚的尺寸) */}
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
             className="w-full p-3.5 flex items-center justify-between hover:bg-neutral-800 transition-colors outline-none"
             title={language === 'zh' ? '系統設定' : 'Settings'}
           >
             <div className="flex items-center gap-3">
-              {/* 🎯 鎖死尺寸 w-6 h-6，保證魚絕對不會變大 */}
               <img
                 src="/fish1.svg"
                 alt="Settings"
@@ -887,10 +784,82 @@ function NoteApp() {
                   <Sliders className="w-4 h-4" />
                 </button>
               </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleEncryption}
+                  className="p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 transition-colors"
+                  title={activeNote.isEncrypted ? "解密筆記" : "加密筆記"}
+                >
+                  {activeNote.isEncrypted ? <Lock className="w-4 h-4 text-emerald-400" /> : <Unlock className="w-4 h-4" />}
+                </button>
+
+                <button
+                  onClick={() => handleDeleteNote(activeNote.id)}
+                  className="p-2 rounded-lg bg-neutral-900 hover:bg-red-950/50 border border-neutral-800 text-neutral-400 hover:text-red-400 transition-colors"
+                  title="刪除筆記"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </header>
+
+            {/* 編輯器與預覽區塊 */}
+            <div className="flex-1 flex flex-col p-4 overflow-y-auto space-y-4">
+              <input
+                ref={titleInputRef}
+                type="text"
+                placeholder="筆記標題..."
+                value={activeNoteData.title}
+                onChange={(e) => handleSaveNoteData(e.target.value, activeNoteData.body)}
+                className="w-full text-xl font-bold bg-transparent border-b border-neutral-800 pb-2 focus:outline-none focus:border-emerald-500 text-neutral-100 placeholder-neutral-600"
+              />
+
+              <div className="flex-1 flex flex-col min-h-[300px]">
+                {viewMode === 'edit' ? (
+                  <textarea
+                    ref={textareaRef}
+                    value={activeNoteData.body}
+                    onChange={(e) => handleSaveNoteData(activeNoteData.title, e.target.value)}
+                    onSelect={() => {
+                      if (textareaRef.current) {
+                        lastSelectionRef.current = {
+                          start: textareaRef.current.selectionStart,
+                          end: textareaRef.current.selectionEnd,
+                        };
+                      }
+                    }}
+                    placeholder="開始撰寫內容..."
+                    className="w-full h-full flex-1 bg-transparent resize-none focus:outline-none text-neutral-300 font-mono text-sm leading-relaxed"
+                  />
+                ) : (
+                  <div className="prose prose-invert max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
+                      {activeNoteData.body}
+                    </ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            </div>
           </>
-        ) : null}
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-neutral-600">
+            請選擇或建立一份筆記
+          </div>
+        )}
       </main>
+
+      {/* 隱藏的檔案上傳 Input */}
+      <input
+        type="file"
+        ref={imageInputRef}
+        onChange={handleInsertImage}
+        accept="image/*"
+        className="hidden"
+      />
     </div>
   );
 }
