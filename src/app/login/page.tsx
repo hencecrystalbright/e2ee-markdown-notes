@@ -182,6 +182,7 @@ export default function LoginPage() {
   };
 
   return (
+    /* 最外層不加 notranslate，允許整頁翻譯成越南語等目標語言 */
     <div className="min-h-screen w-screen bg-neutral-950 flex items-center justify-center p-4 lg:p-12 font-sans relative overflow-hidden">
       {/* 背景光暈效果 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -190,7 +191,7 @@ export default function LoginPage() {
       {/* 雙欄主容器 */}
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
         
-        {/* 👈 左側：筆記建立大綱與優點 (灰色字) */}
+        {/* 👈 左側：筆記建立大綱與優點 (灰色字) - 允許自動翻譯 */}
         <div className="lg:col-span-7 space-y-6 pr-0 lg:pr-6 text-neutral-400">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-lg">
@@ -284,24 +285,33 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <div className="flex justify-between items-center mb-1.5">
+              <div className="flex justify-between items-center mb-1.5 min-h-[20px]">
                 <label className="text-xs font-medium text-neutral-400">使用者帳號 (Account)</label>
+                
+                {/* 🛡️ 只有這裡局部免疫翻譯：加上 notranslate 與 translate="no"，並搭配明確的 key 防止 React DOM 崩潰 */}
                 {isRegister && account.trim() && (
-                  <span className="text-[10px]">
-                    {checkingAccount ? (
-                      <span className="text-neutral-500 flex items-center gap-1">
-                        <Loader2 className="w-3 h-3 animate-spin" /> 檢查中...
+                  <div className="text-[10px] notranslate" translate="no">
+                    {checkingAccount && (
+                      <span key="checking" className="text-neutral-500 flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>檢查中...</span>
                       </span>
-                    ) : isAccountAvailable === true ? (
-                      <span className="text-emerald-400 font-medium flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> 帳號可以使用
+                    )}
+
+                    {!checkingAccount && isAccountAvailable === true && (
+                      <span key="available" className="text-emerald-400 font-medium flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>帳號可以使用</span>
                       </span>
-                    ) : isAccountAvailable === false ? (
-                      <span className="text-red-400 font-medium flex items-center gap-1">
-                        <XCircle className="w-3 h-3" /> 帳號已被使用
+                    )}
+
+                    {!checkingAccount && isAccountAvailable === false && (
+                      <span key="unavailable" className="text-red-400 font-medium flex items-center gap-1">
+                        <XCircle className="w-3 h-3" />
+                        <span>帳號已被使用</span>
                       </span>
-                    ) : null}
-                  </span>
+                    )}
+                  </div>
                 )}
               </div>
 
