@@ -182,16 +182,13 @@ export default function LoginPage() {
   };
 
   return (
-    /* 最外層不加 notranslate，允許整頁翻譯成越南語等目標語言 */
     <div className="min-h-screen w-screen bg-neutral-950 flex items-center justify-center p-4 lg:p-12 font-sans relative overflow-hidden">
-      {/* 背景光暈效果 */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 雙欄主容器 */}
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
         
-        {/* 👈 左側：筆記建立大綱與優點 (灰色字) - 允許自動翻譯 */}
+        {/* 左側：允許自動翻譯 */}
         <div className="lg:col-span-7 space-y-6 pr-0 lg:pr-6 text-neutral-400">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-lg">
@@ -204,7 +201,6 @@ export default function LoginPage() {
           </div>
 
           <div className="border-t border-neutral-800/80 pt-6 space-y-5">
-            {/* 特色 1 */}
             <div className="flex items-start gap-3.5">
               <div className="p-2 rounded-xl bg-neutral-900/90 border border-neutral-800 text-emerald-400 shrink-0">
                 <KeyRound className="w-5 h-5" />
@@ -217,7 +213,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* 特色 2 */}
             <div className="flex items-start gap-3.5">
               <div className="p-2 rounded-xl bg-neutral-900/90 border border-neutral-800 text-indigo-400 shrink-0">
                 <ShieldCheck className="w-5 h-5" />
@@ -230,7 +225,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* 特色 3 */}
             <div className="flex items-start gap-3.5">
               <div className="p-2 rounded-xl bg-neutral-900/90 border border-neutral-800 text-amber-400 shrink-0">
                 <FileCode2 className="w-5 h-5" />
@@ -249,7 +243,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* 👉 右側：登入 / 註冊卡片 */}
+        {/* 右側：登入 / 註冊卡片 */}
         <div className="lg:col-span-5 w-full bg-neutral-900/90 border border-neutral-800 rounded-2xl p-7 shadow-2xl backdrop-blur-xl">
           <div className="grid grid-cols-2 p-1 bg-neutral-950 rounded-xl border border-neutral-800 mb-6">
             <button
@@ -288,7 +282,7 @@ export default function LoginPage() {
               <div className="flex justify-between items-center mb-1.5 min-h-[20px]">
                 <label className="text-xs font-medium text-neutral-400">使用者帳號 (Account)</label>
                 
-                {/* 🛡️ 只有這裡局部免疫翻譯：加上 notranslate 與 translate="no"，並搭配明確的 key 防止 React DOM 崩潰 */}
+                {/* 🛡️ 局部免疫：即時查驗結果 */}
                 {isRegister && account.trim() && (
                   <div className="text-[10px] notranslate" translate="no">
                     {checkingAccount && (
@@ -315,15 +309,17 @@ export default function LoginPage() {
                 )}
               </div>
 
+              {/* 🛡️ 局部免疫：帳號輸入框 */}
               <div className="relative">
                 <input
                   type="text"
                   required
+                  translate="no"
                   disabled={lockCountdown > 0}
                   placeholder="請輸入您的帳號名稱"
                   value={account}
                   onChange={(e) => setAccount(e.target.value)}
-                  className={`w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border rounded-xl focus:outline-none transition-colors disabled:opacity-50 ${
+                  className={`notranslate w-full pl-9 pr-3 py-2.5 text-xs bg-neutral-950 border rounded-xl focus:outline-none transition-colors disabled:opacity-50 ${
                     isRegister && isAccountAvailable === false 
                       ? "border-red-500/80 focus:border-red-500 text-neutral-200" 
                       : isRegister && isAccountAvailable === true
@@ -337,15 +333,18 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-medium text-neutral-400 mb-1.5">密碼 (Password)</label>
+              
+              {/* 🛡️ 局部免疫：密碼輸入框 */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  translate="no"
                   disabled={lockCountdown > 0}
                   placeholder={isRegister ? "需包含至少1個字母與6個數字" : "輸入您的密碼 at least 6 characters..."}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
+                  className="notranslate w-full pl-9 pr-10 py-2.5 text-xs bg-neutral-950 border border-neutral-800 rounded-xl focus:outline-none focus:border-emerald-500 text-neutral-200 placeholder-neutral-600 transition-colors disabled:opacity-50"
                 />
                 <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
                 
